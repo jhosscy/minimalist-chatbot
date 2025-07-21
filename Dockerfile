@@ -23,6 +23,7 @@ COPY . .
 
 # 8. Instalamos las dependencias, incluyendo @std/media-types via jsr antes
 RUN bun x jsr add @std/media-types && \
+    bun x jsr add @std/encoding && \
     bun install
 
 # 9. Exponemos el puerto que utiliza la aplicación (por defecto Bun.serve usa el 3000)
