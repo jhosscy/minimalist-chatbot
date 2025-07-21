@@ -3,14 +3,15 @@ import { promisify } from 'node:util';
 
 import createHeaders from './headers.ts';
 import { createRedisDatabaseAdapter } from './infrastructure/secondary/redis_adapter.ts';
-import { createMistralLlmAdapter } from './infrastructure/secondary/mistral_llm_adapter.ts';
+import { createGroqLlmAdapter } from './infrastructure/secondary/groq_llm_adapter.ts';
 import { createMarkedMarkdownAdapter } from './infrastructure/secondary/marked_markdown_adapter.ts'
 import { createChatMessageAdapter } from './infrastructure/primary/chat_message_handler.ts';
 import { createChatUseCase } from './application/chat_use_case.ts';
 
-const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? ''
+//const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
+const GROQ_API_KEY = Bun.env.GROQ_API_KEY ?? '';
 
-const llmChatAdapter = createMistralLlmAdapter(MISTRAL_API_KEY);
+const llmChatAdapter = createGroqLlmAdapter(GROQ_API_KEY);
 const markdownAdapter = createMarkedMarkdownAdapter();
 const databaseAdapter = createRedisDatabaseAdapter();
 
