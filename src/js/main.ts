@@ -60,13 +60,15 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
   try {
     const chatResponse = await fetch('/chat-message', {
       method: 'POST',
+      headers: {
+        'Accept-Encoding': 'gzip'
+      },
       body: formData
     });
     
     const responseStream = chatResponse.body!.pipeThrough(new TextDecoderStream()) as unknown as AsyncIterable<string>;
     
     for await (const streamChunk of responseStream) {
-      console.log(streamChunk);
       if (!streamChunk.trim()) continue;
       
       let htmlFragment = streamChunk;

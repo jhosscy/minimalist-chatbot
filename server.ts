@@ -1,7 +1,8 @@
 import { brotliCompress, constants } from 'node:zlib';
 import { promisify } from 'node:util';
 
-import createHeaders from './headers.ts';
+import createHeaders from './infrastructure/http/headers.ts';
+import { eTag, ifNoneMatch } from './infrastructure/http/etag.ts';
 import { createRedisDatabaseAdapter } from './infrastructure/secondary/redis_adapter.ts';
 import { createGroqLlmAdapter } from './infrastructure/secondary/groq_llm_adapter.ts';
 import { createMarkedMarkdownAdapter } from './infrastructure/secondary/marked_markdown_adapter.ts'
@@ -21,6 +22,13 @@ const brotliCompressAsync = promisify(brotliCompress);
 
 const { handleChatMessage } = createChatMessageAdapter(chatService, markdownAdapter);
 
+const RAW_EXTS = new Set([
+  "png", "jpg", "jpeg", "webp", "gif", "svg", "avif",
+  "ico", "bmp", "tiff"
+]);
+
+const MIN_COMPRESSION_SIZE_BYTES = 2 * 1024; // 2KB
+
 Bun.serve({
   development: false,
   routes: {
@@ -36,26 +44,64 @@ Bun.serve({
   async fetch(req: Request) {
     const pathname = new URL(req.url).pathname;
     const fileExtension = pathname.split('.').pop() || '';
-    const filePath = `${process.cwd()}/src/dist${pathname}`;
+    const srcPath = `${process.cwd()}/src${pathname}`;
+    const distPath = `${process.cwd()}/src/dist${pathname}`;
+    const acceptEncoding = req.headers.get('accept-encoding') || '';
+    const ifNone = req.headers.get('if-none-match');
 
-    const compressedFile = Bun.file(`${filePath}.br`);
-    const file = Bun.file(`${filePath}.br`);
+    const buildFile = await Bun.build({
+      entrypoints: [srcPath],
+      minify: true,
+    })
 
-    if (await compressedFile.exists()) {
+    const file = RAW_EXTS.has(fileExtension) ? Bun.file(srcPath) : await buildFile.outputs[0];
+    const fileBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(fileBuffer);
+    const computedEtag = await eTag(uint8Array);
+
+    if (!ifNoneMatch(ifNone, computedEtag)) {
+      return new Response(null, createHeaders({
+        status: 304,
+        customHeaders: {
+          'Cache-Control': 'no-cache, must-revalidate'
+        }
+      }))
+    }
+
+    const compressedFile = Bun.file(`${distPath}.br`);
+
+    if (acceptEncoding.includes('br') && await compressedFile.exists()) {
       const fileBuffer = await compressedFile.arrayBuffer();
       return new Response(fileBuffer, createHeaders({
         ext: fileExtension,
         customHeaders: {
+          'etag': computedEtag,
+          'Cache-Control': 'no-cache, must-revalidate',
           'Content-Encoding': 'br',
           'X-Content-Type-Options': 'nosniff'
         }
       }));
     }
 
-    const fileText = await Bun.file(filePath).text();
+    if (acceptEncoding.includes('gzip') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES) {
+      const compressed = Bun.gzipSync(fileBuffer);
+      return new Response(compressed, createHeaders({
+        ext: fileExtension,
+        customHeaders: {
+          'etag': computedEtag,
+          'Cache-Control': 'no-cache, must-revalidate',
+          'Content-Encoding': 'gzip',
+          'X-Content-Type-Options': 'nosniff'
+        }
+      }))
+    }
+
+    const fileText = await file.text();
     return new Response(fileText, createHeaders({
       ext: fileExtension,
       customHeaders: {
+        'ETag': computedEtag,
+        'Cache-Control': 'no-cache, must-revalidate',
         'X-Content-Type-Options': 'nosniff'
       }
     }))

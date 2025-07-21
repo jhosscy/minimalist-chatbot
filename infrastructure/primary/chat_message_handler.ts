@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { renderToString } from 'preact-render-to-string';
 import { ChatResponse, ChatMessage } from '../ui/components/ChatResponse.tsx';
-import createHeaders from '../../headers.ts';
+import createHeaders from '../http/headers.ts';
 import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
 import type { ChatService } from '../../application/ports/chat_service_port.ts';
 
