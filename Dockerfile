@@ -21,8 +21,8 @@ WORKDIR /app
 # 7. Copiamos todo el contenido del proyecto al directorio de trabajo
 COPY . .
 
-# 8. Instalamos las dependencias definidas en package.json (Bun usará el archivo bun.lock para mayor precisión)
-RUN bun install
+# 8. Instalamos las dependencias, incluyendo @std/media-types via jsr antes
+RUN bunx jsr add @std/media-types && bun install
 
 # 9. Exponemos el puerto que utiliza la aplicación (por defecto Bun.serve usa el 3000)
 EXPOSE 10000
@@ -30,5 +30,5 @@ EXPOSE 10000
 # 10. Definimos el comando de buildeo y compresion
 CMD ["bun", "run", "build"]
 
-# 10. Definimos el comando de inicio. En este caso, usamos "index.ts" como punto de entrada
+# 11. Definimos el comando de inicio. En este caso, usamos "index.ts" como punto de entrada
 CMD ["bun", "run", "server.ts"]
