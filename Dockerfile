@@ -28,8 +28,5 @@ RUN bun x jsr add @std/media-types && \
 # 9. Exponemos el puerto que utiliza la aplicación (por defecto Bun.serve usa el 3000)
 EXPOSE 10000
 
-# 10. Definimos el comando de buildeo y compresion
-CMD ["bun", "run", "build"]
-
 # 11. Definimos el comando de inicio. En este caso, usamos "index.ts" como punto de entrada
-CMD ["bun", "run", "server.ts"]
+CMD ["sh", "-c", "bun run build && bun run server.ts"]
