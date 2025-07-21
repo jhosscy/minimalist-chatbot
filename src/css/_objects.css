@@ -1,0 +1,12 @@
+/* 
+  Esta capa es para patrones de diseño y layout.
+  Ejemplo: .wrapper, .grid-container, .media-object
+  Actualmente no tenemos ninguno en este proyecto.
+*/
+
+.chat-history {
+  display: grid;
+  justify-items: center;
+  row-gap: .8rem;
+  padding: 1rem 0;
+}

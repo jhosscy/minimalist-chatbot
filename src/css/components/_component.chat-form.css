@@ -1,0 +1,42 @@
+.chat-form {
+  background-color: var(--bg-secondary);
+  border: none;
+  border-radius: 1.3rem 1.3rem 0 0;
+  padding-bottom: .5rem;
+}
+
+.chat-form form {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  row-gap: .5rem;
+}
+
+.chat-form__input {
+  field-sizing: content;
+  resize: none;
+  outline: none;
+  font-size: 1rem;
+  border: none;
+  padding: 1rem;
+  width: 100%;
+  max-height: 8rem;
+  background: none;
+  color: var(--text-primary);
+}
+
+.chat-form__input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.chat-form__input:hover {
+  border-color: var(--border-hover);
+}
+
+.chat-form:has(.chat-form__input:focus) {
+  box-shadow: 0 0 .1rem .1rem inset var(--brand-default);
+}
+
+.chat-form__submit {
+  /* Clase específica para el botón de envío si necesitas estilos adicionales */
+}

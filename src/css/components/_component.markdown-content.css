@@ -1,0 +1,162 @@
+/* Tipografía base */
+.marked-content {
+  font-family: sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #ffffff;
+}
+
+/* Encabezados */
+.marked-content h1,
+.marked-content h2,
+.marked-content h3,
+.marked-content h4,
+.marked-content h5,
+.marked-content h6 {
+  margin: 1.5rem 0 0.5rem 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.marked-content h1 { font-size: 1.25rem; }
+.marked-content h2 { font-size: 1.10rem; }
+.marked-content h3 { font-size: 1rem; }
+.marked-content h4 { font-size: 1rem; }
+.marked-content h5 { font-size: 1rem; }
+.marked-content h6 { font-size: 1rem; }
+
+/* Párrafos */
+.marked-content p {
+}
+
+/* Listas */
+.marked-content ul,
+.marked-content ol {
+  list-style-position: inside;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.marked-content li {
+  margin: 0.25rem 0;
+}
+
+/* Enlaces */
+.marked-content a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.marked-content a:hover {
+  text-decoration: underline;
+}
+
+/* Código */
+.marked-content code {
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.marked-content pre {
+  border: .3rem solid var(--border-default);
+  border-radius: .6rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.marked-content pre code {
+  border-radius: 0;
+}
+
+/* Scrollbar personalizada para bloques de código */
+.marked-content code::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+
+/* Citas */
+.marked-content blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #ddd;
+  color: #666;
+  font-style: italic;
+}
+
+/* Tablas (ESTILOS MEJORADOS) */
+.marked-content table {
+  display: block; /* Necesario para que overflow y max-height funcionen */
+  width: 100%;
+  overflow-x: auto; /* Habilita scroll horizontal y vertical según se necesite */
+  margin: 1.5rem 0;
+  border-spacing: 0;
+  border: 1px solid var(--border-default);
+  border-radius: .6rem;
+  background-color: var(--table-row-bg);
+}
+
+.marked-content td,
+.marked-content th {
+  font-size: .75rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
+  padding: 0.5rem 0.6rem;
+}
+
+.marked-content tr td:last-child,
+.marked-content tr th:last-child {
+  border-right: none; /* Elimina el borde derecho de la última celda */
+}
+
+.marked-content tbody tr:last-child td {
+  border-bottom: none; /* Elimina el borde inferior de la última fila */
+}
+
+.marked-content th {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--table-header-bg);
+}
+
+/* Líneas horizontales */
+.marked-content hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 2rem 0;
+}
+
+/* Imágenes */
+.marked-content img {
+  display: block;
+  background-color: var(--border-default);
+  border: .2rem solid var(--border-default);
+  border-radius: 0.6rem;
+  max-width: 100%;
+  max-height: 600px;
+  height: auto;
+  padding: .3rem;
+  margin: 1rem auto;
+}
+
+/* Elementos inline */
+.marked-content strong,
+.marked-content b {
+  font-weight: 600;
+}
+
+.marked-content em,
+.marked-content i {
+  font-style: italic;
+}
+
+/* Primer elemento sin margen superior */
+.marked-content > *:first-child {
+  margin-top: 0;
+}
+
+/* Último elemento sin margen inferior */
+.marked-content > *:last-child {
+  margin-bottom: 0;
+}

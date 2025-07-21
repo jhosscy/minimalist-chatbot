@@ -1,0 +1,23 @@
+.button {
+  display: flex;
+  border: none;
+  border-radius: 100%;
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.button--primary {
+  background-color: var(--brand-default);
+  color: var(--brand-text);
+  margin-right: 1rem;
+}
+
+.button--primary:hover {
+  background-color: var(--brand-muted);
+}
+
+.button--primary:disabled {
+  background-color: var(--brand-disabled-bg);
+  color: var(--brand-disabled-text);
+  cursor: not-allowed;
+}

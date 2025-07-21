@@ -1,0 +1,16 @@
+.chat-message {
+  padding: .5rem 1rem;
+  width: 100%;
+  overflow-wrap: break-word;
+}
+
+.chat-message--user {
+  background-color: var(--user-message-bg);
+  color: var(--user-message-text);
+  width: 95%;
+  border-radius: .6rem;
+}
+
+.chat-message--assistant {
+  hyphens: auto;
+}

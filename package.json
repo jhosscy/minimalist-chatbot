@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "build": "bun run compress.builder.ts"
+  },
+  "dependencies": {
+    "@mistralai/mistralai": "^1.7.3",
+    "@std/media-types": "npm:@jsr/std__media-types",
+    "@upstash/redis": "^1.35.1",
+    "highlight.js": "^11.11.1",
+    "marked": "^16.0.0",
+    "marked-highlight": "^2.2.2",
+    "preact": "^10.26.9",
+    "preact-render-to-string": "^6.5.13"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.18",
+    "typescript": "^5.8.3"
+  }
+}

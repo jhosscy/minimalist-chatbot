@@ -1,0 +1,33 @@
+/* ==========================================================================
+   1. SETTINGS - Variables globales, colores, fuentes.
+   ========================================================================== */
+@import url('_settings.css');
+
+/* ==========================================================================
+   2. GENERIC - Resets, box-sizing.
+   ========================================================================== */
+@import url('_generic.css');
+
+/* ==========================================================================
+   3. ELEMENTS - Estilos base para etiquetas HTML.
+   ========================================================================== */
+@import url('_elements.css');
+
+/* ==========================================================================
+   4. OBJECTS - Patrones de layout sin estilos visuales.
+   ========================================================================== */
+@import url('_objects.css');
+
+/* ==========================================================================
+   5. COMPONENTS - Componentes de UI discretos y estilizados.
+   ========================================================================== */
+@import url('components/_component.chat-form.css');
+@import url('components/_component.chat-message.css');
+@import url('components/_component.markdown-content.css');
+@import url('components/_component.button.css');
+@import url('components/_component.typing-indicator.css');
+
+/* ==========================================================================
+   6. UTILITIES - Clases de ayuda con alta especificidad.
+   ========================================================================== */
+@import url('_utilities.css');
