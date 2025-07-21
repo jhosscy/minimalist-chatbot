@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "@mistralai/mistralai": "^1.7.3",
+    "@std/encoding": "npm:@jsr/std__encoding",
     "@std/media-types": "npm:@jsr/std__media-types",
     "@upstash/redis": "^1.35.1",
     "groq-sdk": "^0.27.0",
