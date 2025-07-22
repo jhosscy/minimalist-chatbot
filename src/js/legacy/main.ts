@@ -64,7 +64,7 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
   disableSubmitButton(formElement);
   
   try {
-    const chatResponse = await fetch('http://localhost:3001/chat-message', {
+    const chatResponse = await fetch('/chat-message', {
       method: 'POST',
       body: formData
     });
