@@ -9,6 +9,7 @@
   color: var(--user-message-text);
   width: 95%;
   border-radius: .6rem;
+  white-space: break-spaces;
 }
 
 .chat-message--assistant {

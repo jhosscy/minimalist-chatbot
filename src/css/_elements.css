@@ -30,3 +30,9 @@ svg {
     background-color: var(--scrollbar-thumb-bg-hover);
   }
 }
+
+@supports not (height: 100dvh) {
+  body {
+    height: 100vh;
+  }
+}

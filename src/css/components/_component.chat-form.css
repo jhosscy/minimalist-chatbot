@@ -40,3 +40,9 @@
 .chat-form__submit {
   /* Clase específica para el botón de envío si necesitas estilos adicionales */
 }
+
+@supports not selector(:has(*)) {
+  .chat-form:focus-within {
+    box-shadow: 0 0 .1rem .1rem inset var(--brand-default);
+  }
+}
