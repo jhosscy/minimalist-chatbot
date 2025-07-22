@@ -12,10 +12,12 @@ import { createChatUseCase } from './application/chat_use_case.ts';
 
 //const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
 const GROQ_API_KEY = Bun.env.GROQ_API_KEY ?? '';
+const REDIS_UPSTASH_URL = Bun.env.REDIS_UPSTASH_URL ?? '';
+const REDIS_UPSTASH_TOKEN = Bun.env.REDIS_UPSTASH_TOKEN ?? '';
 
 const llmChatAdapter = createGroqLlmAdapter(GROQ_API_KEY);
 const markdownAdapter = createMarkedMarkdownAdapter();
-const databaseAdapter = createRedisDatabaseAdapter();
+const databaseAdapter = createRedisDatabaseAdapter(REDIS_UPSTASH_URL, REDIS_UPSTASH_TOKEN);
 
 const chatService = createChatUseCase(llmChatAdapter, databaseAdapter);
 

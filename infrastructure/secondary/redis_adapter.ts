@@ -1,11 +1,8 @@
 import { Redis } from '@upstash/redis'
 import type { DatabasePort } from '../../domain/ports/database_port.ts';
 
-export function createRedisDatabaseAdapter(): DatabasePort {
-  const redisClient = new Redis({
-    url: 'https://cute-mongrel-43714.upstash.io',
-    token: 'AarCAAIjcDEzYmZhYzNjMWRiNmM0MzVkOTcxMTEzNDU3YTU1ZDNkNXAxMA',
-  });
+export function createRedisDatabaseAdapter(url: string, token: string): DatabasePort {
+  const redisClient = new Redis({ url, token })
   return {
     async appendMessages(sessionId: string, ...messages: Array<string>) {
       await redisClient.rpush(sessionId, ...messages);
