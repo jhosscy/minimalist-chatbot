@@ -93,6 +93,7 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
 
         if (isFirstFragment) {
           formElement.reset();
+          promptInput.style.height = 'auto';
           isFirstFragment = false;
         }
       }
