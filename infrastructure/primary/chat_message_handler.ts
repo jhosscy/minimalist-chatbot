@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { renderToString } from 'preact-render-to-string';
+import { encode } from 'he';
 import { ChatResponse, ChatMessage } from '../ui/components/ChatResponse.tsx';
 import createHeaders from '../http/headers.ts';
 import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
@@ -17,7 +18,7 @@ export function createChatMessageAdapter(
 
     const initialHtml = renderToString(
       ChatResponse({
-        userMessageHtml: markdownAdapter.convertToHtml(userInput),
+        userMessageHtml: encode(userInput, { useNamedReferences: true }),
         sessionId: sessionId,
         isNewSession: !existingSessionId
       }),
@@ -25,7 +26,8 @@ export function createChatMessageAdapter(
 
     const chatStream = new ReadableStream({
       async start(controller) {
-        controller.enqueue(initialHtml);
+        const BOUNDARY = '<!-- FRAGMENT_END -->';
+        controller.enqueue(initialHtml + BOUNDARY);
         
         const assistantReply = await chatService.sendMessage(sessionId, userInput);
         const assistantHtml = renderToString(
@@ -34,7 +36,7 @@ export function createChatMessageAdapter(
             content: markdownAdapter.convertToHtml(assistantReply)
           })
         );
-        controller.enqueue(assistantHtml);
+        controller.enqueue(assistantHtml + BOUNDARY);
         controller.close();
       }
     });
