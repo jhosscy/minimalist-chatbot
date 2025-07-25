@@ -52,7 +52,7 @@ Bun.serve({
     const distPath = `${process.cwd()}/src/dist${pathname}`;
     const acceptEncoding = req.headers.get('accept-encoding') || '';
     const ifNone = req.headers.get('if-none-match');
-    const browser = Bowser.getParser(req.headers.get('user-agent'));
+    const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
     const isOldBrowser = browser.satisfies({
       chrome: '~95'
     });

@@ -29,7 +29,6 @@
   },
   // Carpeta(s) o patrón(es) a ignorar:
   "exclude": [
-    "node_modules",
-    "server.ts"
+    "node_modules"
   ]
 }

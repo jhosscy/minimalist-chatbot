@@ -8,7 +8,7 @@ interface ResponseHeadersOptions {
   /** Código de estado HTTP para la respuesta (por defecto: 200) */
   status?: number;
   /** Extensión del archivo para determinar el Content-Type */
-  ext: string;
+  ext?: string;
   /** Método HTTP permitido (GET, POST, etc) (por defecto: '*') */
   method?: string;
   /** Origen permitido para CORS (por defecto: '*') */
@@ -23,7 +23,7 @@ interface ResponseHeadersOptions {
  * @param ext - La extensión del archivo (con o sin punto inicial)
  * @returns El valor del Content-Type sin parámetros adicionales
  */
-function getContentTypeFromExtension(ext: string): string {
+function getContentTypeFromExtension(ext = ''): string {
   // Obtenemos el Content-Type y eliminamos cualquier parámetro adicional (como charset)
   const mediaType = contentType(ext)?.split(";")[0];
   // Si no se encuentra un tipo de contenido, devolvemos el tipo genérico por defecto
