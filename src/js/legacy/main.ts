@@ -77,10 +77,7 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) {
-        if (buffer.trim()) processFragment(fragment, formElement);
-        break;
-      };
+      if (done) break;
 
       buffer += value;
 

@@ -16,7 +16,7 @@ export function ChatMessage({ role, content, children }: ChatMessageProps) {
   return (
     <article {...articleProps}>
       {children || (
-        <div class="marked-content" dangerouslySetInnerHTML={{ __html: content }}></div>
+        <div class="marked-content" dangerouslySetInnerHTML={{ __html: content ?? '' }}></div>
       )}
     </article>
   );

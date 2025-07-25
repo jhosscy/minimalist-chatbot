@@ -30,7 +30,7 @@ const colors = {
   info: Bun.color('#E5E7EB', 'ansi'),       // Gray
 };
 
-function formatBytes(bytes, decimals = 2) {
+function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -49,7 +49,7 @@ const brotliCompressAsync = promisify(brotliCompress);
  * @param {string} relativeDestPath - The relative path of the file inside the 'dist' directory.
  * @param {ArrayBuffer} contentBuffer - The file content to process.
  */
-async function processAndWriteFile(relativeDestPath, contentBuffer) {
+async function processAndWriteFile(relativeDestPath: string, contentBuffer: ArrayBuffer): Promise<void> {
   const finalDestPath = path.join(distDir, relativeDestPath);
   const originalSize = contentBuffer.byteLength;
 
