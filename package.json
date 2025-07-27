@@ -1,7 +1,4 @@
 {
-  "scripts": {
-    "build": "bun run compress.builder.ts"
-  },
   "dependencies": {
     "@mistralai/mistralai": "^1.7.3",
     "@std/encoding": "npm:@jsr/std__encoding",

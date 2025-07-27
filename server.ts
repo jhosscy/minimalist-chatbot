@@ -48,8 +48,6 @@ Bun.serve({
   async fetch(req: Request) {
     const { pathname } = new URL(req.url);
     const fileExtension = pathname.split('.').pop() || '';
-    const srcPath = `${process.cwd()}/src${pathname}`;
-    const distPath = `${process.cwd()}/src/dist${pathname}`;
     const acceptEncoding = req.headers.get('accept-encoding') || '';
     const ifNone = req.headers.get('if-none-match');
     const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
@@ -58,14 +56,23 @@ Bun.serve({
     });
 
     const dir = isOldBrowser ? '/js/legacy' : '/js/modern';
-    const targetPath = fileExtension === 'js' ? srcPath.replace('/js', dir) : srcPath;
+    const path = pathname.replace('/js', dir);
+    const distPath = `${process.cwd()}/src/dist${path}`;
+    const srcPath = `${process.cwd()}/src${path}`;
 
-    const buildFile = await Bun.build({
-      entrypoints: [targetPath],
-      minify: true,
-    })
+    const distFileTemp = Bun.file(distPath);
+    if (!await distFileTemp.exists() && !RAW_EXTS.has(fileExtension)) {
+      await Bun.build({
+        entrypoints: [srcPath],
+        outdir: './src/dist',
+        minify: true,
+        naming: `${fileExtension === 'js' ? dir : fileExtension}/[name].[ext]`,
+        define: { API_BASE: "" },
+        drop: ['console', 'debugger']
+      });
+    }
 
-    const file = RAW_EXTS.has(fileExtension) ? Bun.file(targetPath) : await buildFile.outputs[0];
+    const file = RAW_EXTS.has(fileExtension) ? Bun.file(srcPath) : Bun.file(distPath);
     const fileBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(fileBuffer);
     const computedEtag = await eTag(uint8Array);
@@ -80,10 +87,14 @@ Bun.serve({
       }))
     }
 
-    const compressedFile = Bun.file(`${distPath}.br`);
-    if (acceptEncoding.includes('br') && await compressedFile.exists()) {
-      const fileBuffer = await compressedFile.arrayBuffer();
-      return new Response(fileBuffer, createHeaders({
+    if (acceptEncoding.includes('br') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES) {
+      const compressed = await brotliCompressAsync(fileBuffer, {
+        params: {
+          [constants.BROTLI_PARAM_QUALITY]: 11,
+          [constants.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
+        },
+      });
+      return new Response(compressed, createHeaders({
         ext: fileExtension,
         customHeaders: {
           'ETag': computedEtag,

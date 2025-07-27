@@ -57,7 +57,7 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
   disableSubmitButton(formElement);
   
   try {
-    const chatResponse = await fetch('/chat-message', {
+    const chatResponse = await fetch(`${API_BASE}/chat-message`, {
       method: 'POST',
       body: formData
     });

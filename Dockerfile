@@ -30,4 +30,4 @@ RUN bun x jsr add @std/media-types && \
 EXPOSE 10000
 
 # 11. Definimos el comando de inicio. En este caso, usamos "index.ts" como punto de entrada
-CMD ["sh", "-c", "bun run build && bun run server.ts"]
+CMD ["sh", "-c", "bun run server.ts"]
