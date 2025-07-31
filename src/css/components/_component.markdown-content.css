@@ -32,8 +32,7 @@
 /* Listas */
 .marked-content ul,
 .marked-content ol {
-  list-style-position: inside;
-  padding: 0;
+  padding-left: 1.2rem;
   margin: 1rem 0;
 }
 

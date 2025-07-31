@@ -9,8 +9,8 @@ function disableSubmitButton(form: HTMLFormElement, disabled: boolean = true): v
   }
 }
 
-function removeLoadingIndicator(): void {
-  const loadingIndicator = chatHistoryContainer?.querySelector('article[data-loading]');
+function removeLoadingIndicator(element: HTMLElement): void {
+  const loadingIndicator = element?.querySelector('article[data-loading]');
   if (loadingIndicator) {
     loadingIndicator.remove();
   }
@@ -42,14 +42,15 @@ function handleOutOfBandSwap(chunk: string, formElement: HTMLFormElement): strin
 }
 
 function addMessageToChat(htmlFragment: string): void {
-  removeLoadingIndicator();
   chatHistoryContainer?.insertAdjacentHTML('beforeend', htmlFragment);
   scrollToBottom();
 }
 
-
+let isSending = false;
 chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> => {
   event.preventDefault();
+  if (isSending) return;
+  isSending = true;
   
   const formElement = event.target as HTMLFormElement;
   const formData = new FormData(formElement);
@@ -65,16 +66,31 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
     const responseStream = chatResponse.body!.pipeThrough(new TextDecoderStream()) as unknown as AsyncIterable<string>;
 
     let isFirstChunk = true;
+    let bufferFragment = '';
     for await (const streamChunk of responseStream) {
       if (!streamChunk.trim()) continue;
       
-      let htmlFragment = streamChunk;
+      const start = streamChunk.indexOf('<article') >>> 0;
+      const end = streamChunk.lastIndexOf('<!--') >>> 0;
+      bufferFragment += streamChunk.slice(start, end);
       
       if (streamChunk.includes('swap-oob')) {
-        htmlFragment = handleOutOfBandSwap(streamChunk, formElement);
+        bufferFragment = handleOutOfBandSwap(bufferFragment, formElement);
+      }
+
+      if ((bufferFragment.match(/<article\b[^>]*\bclass="[^"]*\bchat-message--assistant\b[^"]*"[^>]*>/g) || []).length === 2) {
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = bufferFragment;
+        removeLoadingIndicator(tempContainer);
+        bufferFragment = tempContainer.innerHTML
+      }
+
+      if (!isFirstChunk) {
+        chatHistoryContainer.lastElementChild?.remove();
+        chatHistoryContainer.lastElementChild?.remove();
       }
       
-      addMessageToChat(htmlFragment);
+      addMessageToChat(bufferFragment);
 
       if (isFirstChunk) {
         formElement.reset();
@@ -86,13 +102,14 @@ chatForm?.addEventListener('submit', async (event: SubmitEvent): Promise<void> =
     console.error('Error al procesar el mensaje del chat:', error);
   } finally {
     disableSubmitButton(formElement, false);
+    isSending = false;
   }
 });
 
-  //const data = Object.fromEntries(formData.entries());
 promptInput?.addEventListener('keydown', (event: KeyboardEvent): void => {
   if (event.ctrlKey && event.key === 'Enter') {
     event.preventDefault();
     chatForm.requestSubmit();
   }
 });
+//const data = Object.fromEntries(formData.entries());

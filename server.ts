@@ -1,4 +1,4 @@
-import { brotliCompress, constants } from 'node:zlib';
+import { brotliCompress, createBrotliCompress, createGzip, constants as zc } from 'node:zlib';
 import { promisify } from 'node:util';
 import * as Bowser from "bowser";
 
@@ -42,7 +42,24 @@ Bun.serve({
       return new Response(App, createHeaders({ ext: 'html' }));
     },
     '/chat-message': {
-      POST: async (req: Request) => handleChatMessage(req)
+      POST: async (req: Request) => {
+        const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
+        const isOldBrowser = browser.satisfies({
+          chrome: '~95'
+        });
+        const compressionStream = isOldBrowser
+          ? createGzip({
+              flush: zc.Z_SYNC_FLUSH,
+              finishFlush: zc.Z_SYNC_FLUSH,
+            })
+          : createBrotliCompress({
+              params: {
+                [zc.BROTLI_PARAM_QUALITY]: 1,
+              },
+            });
+        const encodingType = isOldBrowser ? 'gzip' : 'br';
+        return handleChatMessage(req, encodingType, compressionStream);
+      }
     }
   },
   async fetch(req: Request) {
@@ -68,7 +85,7 @@ Bun.serve({
         minify: true,
         naming: `${fileExtension === 'js' ? dir : fileExtension}/[name].[ext]`,
         define: { API_BASE: "" },
-        drop: ['console', 'debugger']
+        drop: ['debugger']
       });
     }
 
@@ -90,8 +107,8 @@ Bun.serve({
     if (acceptEncoding.includes('br') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES) {
       const compressed = await brotliCompressAsync(fileBuffer, {
         params: {
-          [constants.BROTLI_PARAM_QUALITY]: 11,
-          [constants.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
+          [zc.BROTLI_PARAM_QUALITY]: 11,
+          [zc.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
         },
       });
       return new Response(compressed, createHeaders({
