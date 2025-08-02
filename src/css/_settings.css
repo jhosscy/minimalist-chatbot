@@ -1,4 +1,63 @@
+@font-face {
+  font-family: InterVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/InterVariable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/Inter-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: JetBrainsVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/JetBrainsMonoVariable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('../fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('../fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/UcC73FwrK3iLTeHuS_fjbvMwCp504jAa1ZL7.woff2") format("woff2");
+}*/
+
 :root {
+  --font-family-primary: 'Inter', sans-serif, system-ui;
+  --font-family-code: 'JetBrainsMono', monospace, system-ui;
+
   --bg-primary: #121212;
   --bg-secondary: #1e1e1e;
   --text-primary: #e0e0e0;
@@ -22,4 +81,11 @@
 
   --table-header-bg: #2c2c2c;
   --table-row-bg: #222222;
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    --font-family-primary: InterVariable, sans-serif, system-ui;
+    --font-family-code: JetBrainsVariable, monospace, system-ui;
+  }
 }

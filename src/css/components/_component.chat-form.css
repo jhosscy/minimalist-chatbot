@@ -16,6 +16,8 @@
   field-sizing: content;
   resize: none;
   outline: none;
+  font-family: var(--font-family-primary);
+  font-weight: 400;
   font-size: 1rem;
   border: none;
   padding: 1rem;

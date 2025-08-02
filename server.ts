@@ -1,6 +1,8 @@
 import { brotliCompress, createBrotliCompress, createGzip, constants as zc } from 'node:zlib';
 import { promisify } from 'node:util';
+import { join } from 'node:path';
 import * as Bowser from "bowser";
+import { transform } from 'lightningcss';
 
 import createHeaders from './infrastructure/http/headers.ts';
 import { eTag, ifNoneMatch } from './infrastructure/http/etag.ts';
@@ -27,8 +29,10 @@ const { handleChatMessage } = createChatMessageAdapter(chatService, markdownAdap
 
 const RAW_EXTS = new Set([
   "png", "jpg", "jpeg", "webp", "gif", "svg", "avif",
-  "ico", "bmp", "tiff"
+  "ico", "bmp", "tiff", "ttf", "woff2"
 ]);
+
+const EXT_FONTS = new Set(["ttf", "woff2"]);
 
 const MIN_COMPRESSION_SIZE_BYTES = 2 * 1024; // 2KB
 
@@ -72,24 +76,39 @@ Bun.serve({
       chrome: '~95'
     });
 
-    const dir = isOldBrowser ? '/js/legacy' : '/js/modern';
-    const path = pathname.replace('/js', dir);
-    const distPath = `${process.cwd()}/src/dist${path}`;
-    const srcPath = `${process.cwd()}/src${path}`;
+    const legacyOrModernDir = isOldBrowser ? '/js/legacy' : '/js/modern';
+    const adjustedPath = pathname.replace('/js', legacyOrModernDir);
+    const distPath = `${process.cwd()}/src/dist${adjustedPath}`;
+    const srcPath = `${process.cwd()}/src${adjustedPath}`;
 
     const distFileTemp = Bun.file(distPath);
     if (!await distFileTemp.exists() && !RAW_EXTS.has(fileExtension)) {
-      await Bun.build({
+      const { outputs } = await Bun.build({
         entrypoints: [srcPath],
-        outdir: './src/dist',
-        minify: true,
-        naming: `${fileExtension === 'js' ? dir : fileExtension}/[name].[ext]`,
-        define: { API_BASE: "" },
-        drop: ['debugger']
+        minify: fileExtension === 'css' ? false : true,
+        naming: {
+          entry: `${fileExtension === 'js' ? legacyOrModernDir : fileExtension}/[name].[ext]`,
+        },
+        define: { API_BASE: '' },
+        drop: ['debugger'],
+        external: ['../fonts/*']
       });
+
+      const artifact = outputs[0];
+      const outputPath = join(`${Bun.cwd}/src/dist`, artifact.path);
+      let outputContent = await artifact.text();
+      if (fileExtension === 'css') {
+        let { code } = transform({
+          code: Buffer.from(outputContent),
+          minify: true
+        });
+        outputContent = code;
+      }
+      await Bun.write(outputPath, outputContent);
     }
 
-    const file = RAW_EXTS.has(fileExtension) ? Bun.file(srcPath) : Bun.file(distPath);
+    const preferredSrcPath = await Bun.file(`${srcPath}.br`).exists() ? `${srcPath}.br` : srcPath;
+    const file = RAW_EXTS.has(fileExtension) ? Bun.file(preferredSrcPath) : Bun.file(distPath);
     const fileBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(fileBuffer);
     const computedEtag = await eTag(uint8Array);
@@ -104,13 +123,15 @@ Bun.serve({
       }))
     }
 
-    if (acceptEncoding.includes('br') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES) {
-      const compressed = await brotliCompressAsync(fileBuffer, {
-        params: {
-          [zc.BROTLI_PARAM_QUALITY]: 11,
-          [zc.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
-        },
-      });
+    if (acceptEncoding.includes('br') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES && !EXT_FONTS.has(fileExtension)) {
+      const compressed = preferredSrcPath.endsWith('.br')
+        ? fileBuffer
+        : await brotliCompressAsync(fileBuffer, {
+            params: {
+              [zc.BROTLI_PARAM_QUALITY]: 11,
+              [zc.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
+            },
+          });
       return new Response(compressed, createHeaders({
         ext: fileExtension,
         customHeaders: {
@@ -122,7 +143,7 @@ Bun.serve({
       }));
     }
 
-    if (acceptEncoding.includes('gzip') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES) {
+    if (acceptEncoding.includes('gzip') && fileBuffer.byteLength > MIN_COMPRESSION_SIZE_BYTES && !EXT_FONTS.has(fileExtension)) {
       const compressed = Bun.gzipSync(fileBuffer);
       return new Response(compressed, createHeaders({
         ext: fileExtension,
@@ -135,14 +156,13 @@ Bun.serve({
       }))
     }
 
-    const fileText = await file.text();
-    return new Response(fileText, createHeaders({
+    return new Response(fileBuffer, createHeaders({
       ext: fileExtension,
       customHeaders: {
         'ETag': computedEtag,
-        'Cache-Control': 'no-cache, must-revalidate',
+        'Cache-Control': EXT_FONTS.has(fileExtension) ? 'public, max-age=2592000, immutable' : 'no-cache, must-revalidate',
         'X-Content-Type-Options': 'nosniff'
       }
-    }))
+    }));
   }
 })
