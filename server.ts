@@ -1,15 +1,16 @@
-import { brotliCompress, createBrotliCompress, createGzip, constants as zc } from 'node:zlib';
+import { brotliCompress, constants as zc } from 'node:zlib';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
-import * as Bowser from "bowser";
+import Bowser from "bowser";
 import { transform } from 'lightningcss';
 
+import Home from './src/index.html' with { type: 'text' };
 import createHeaders from './infrastructure/http/headers.ts';
 import { eTag, ifNoneMatch } from './infrastructure/http/etag.ts';
 import { createRedisDatabaseAdapter } from './infrastructure/secondary/redis_adapter.ts';
 import { createGroqLlmAdapter } from './infrastructure/secondary/groq_llm_adapter.ts';
 import { createMarkedMarkdownAdapter } from './infrastructure/secondary/marked_markdown_adapter.ts'
-import { createChatMessageAdapter } from './infrastructure/primary/chat_message_handler.ts';
+import { createChatAdapter } from './infrastructure/primary/chat_handler.ts';
 import { createChatUseCase } from './application/chat_use_case.ts';
 
 //const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
@@ -25,7 +26,7 @@ const chatService = createChatUseCase(llmChatAdapter, databaseAdapter);
 
 const brotliCompressAsync = promisify(brotliCompress);
 
-const { handleChatMessage } = createChatMessageAdapter(chatService, markdownAdapter);
+const { handleChat } = createChatAdapter(chatService, markdownAdapter, databaseAdapter);
 
 const RAW_EXTS = new Set([
   "png", "jpg", "jpeg", "webp", "gif", "svg", "avif",
@@ -40,29 +41,25 @@ Bun.serve({
   port: Bun.env.PORT ?? 3001,
   development: false,
   routes: {
-    '/': async () => {
-      const file = Bun.file('./src/index.html');
-      const App = await file.text();
-      return new Response(App, createHeaders({ ext: 'html' }));
-    },
-    '/chat-message': {
+    '/': {
+      GET: () => {
+        return new Response(Home as unknown as string, createHeaders({ ext: 'html' }));
+      },
       POST: async (req: Request) => {
         const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
         const isOldBrowser = browser.satisfies({
           chrome: '~95'
         });
-        const compressionStream = isOldBrowser
-          ? createGzip({
-              flush: zc.Z_SYNC_FLUSH,
-              finishFlush: zc.Z_SYNC_FLUSH,
-            })
-          : createBrotliCompress({
+        const compressed = isOldBrowser
+          ? async (content: string) => Bun.gzipSync(content)
+          : (content: string) => brotliCompressAsync(content, {
               params: {
-                [zc.BROTLI_PARAM_QUALITY]: 1,
+                [zc.BROTLI_PARAM_QUALITY]: 11,
+                [zc.BROTLI_PARAM_SIZE_HINT]: content.length,
               },
             });
         const encodingType = isOldBrowser ? 'gzip' : 'br';
-        return handleChatMessage(req, encodingType, compressionStream);
+        return handleChat(req, Home as unknown as string, encodingType, compressed);
       }
     }
   },
@@ -95,14 +92,15 @@ Bun.serve({
       });
 
       const artifact = outputs[0];
-      const outputPath = join(`${Bun.cwd}/src/dist`, artifact.path);
-      let outputContent = await artifact.text();
+      const outputPath = join(`${process.cwd()}/src/dist`, artifact?.path ?? '');
+      let outputContent: Uint8Array | string = await artifact?.text() ?? '';
       if (fileExtension === 'css') {
         let { code } = transform({
           code: Buffer.from(outputContent),
-          minify: true
+          minify: true,
+          filename: ''
         });
-        outputContent = code;
+        outputContent = code
       }
       await Bun.write(outputPath, outputContent);
     }
@@ -132,7 +130,7 @@ Bun.serve({
               [zc.BROTLI_PARAM_SIZE_HINT]: fileBuffer.byteLength,
             },
           });
-      return new Response(compressed, createHeaders({
+      return new Response(compressed as unknown as ArrayBuffer, createHeaders({
         ext: fileExtension,
         customHeaders: {
           'ETag': computedEtag,
