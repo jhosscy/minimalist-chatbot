@@ -70,7 +70,7 @@ async function calcEntity(
     entity = encoder.encode(entity);
   }
 
-  const hash = base64Encode(await crypto.subtle.digest(algorithm, entity))
+  const hash = base64Encode(await crypto.subtle.digest(algorithm, entity as unknown as BufferSource))
     .substring(0, 27);
 
   return `${entity.length.toString(16)}-${hash}`;

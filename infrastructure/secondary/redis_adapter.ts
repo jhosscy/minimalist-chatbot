@@ -10,7 +10,7 @@ export function createRedisDatabaseAdapter(url: string, token: string): Database
     },
     async getConversationMessages(sessionId: string) {
       const rawMessages = await redisClient.lrange(sessionId, 0, -1);
-      if (!rawMessages?.length) [];
+      if (!rawMessages?.length) return [];
 
       return rawMessages.map((content, index)=> ({
         role: index % 2 ? 'assistant' : 'user', content
