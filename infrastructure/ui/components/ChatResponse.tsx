@@ -2,48 +2,32 @@ import type { ComponentChildren } from 'preact';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
-  content?: string;
-  children?: ComponentChildren;
+  content: string;
 }
 
-export function ChatMessage({ role, content, children }: ChatMessageProps) {
+export function ChatMessage({ role, content }: ChatMessageProps) {
   const articleProps = {
     class: `chat-message chat-message--${role}`,
-    'aria-label': role,
-    ...(children && { 'data-loading': 'true' })
+    'aria-label': role
   };
 
   return (
     <article {...articleProps}>
-      {children || (
-        <div class="marked-content" dangerouslySetInnerHTML={{ __html: content ?? '' }}></div>
-      )}
+      <div class="marked-content" dangerouslySetInnerHTML={{ __html: content }}></div>
     </article>
   );
 }
 
 interface ChatResponseProps {
   userMessageHtml: string;
-  sessionId: string;
-  isNewSession: boolean;
+  assistantMessageHtml: string;
 }
 
-export function ChatResponse({ userMessageHtml, sessionId, isNewSession }: ChatResponseProps) {
+export function ChatResponse({ userMessageHtml, assistantMessageHtml }: ChatResponseProps) {
   return (
     <>
       <ChatMessage role="user" content={userMessageHtml} />
-      <ChatMessage role="assistant">
-        <div class="typing-indicator">
-          <div class="typing-indicator__dot"></div>
-          <div class="typing-indicator__dot"></div>
-          <div class="typing-indicator__dot"></div>
-          <div class="typing-indicator__dot"></div>
-        </div>
-      </ChatMessage>
-      
-      {isNewSession && (
-        <input type="hidden" name="session" value={sessionId} id="session-uuid" swap-oob />
-      )}
+      <ChatMessage role="assistant" content={assistantMessageHtml} />
     </>
   );
 }

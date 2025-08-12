@@ -43,6 +43,15 @@
   /* Clase específica para el botón de envío si necesitas estilos adicionales */
 }
 
+.chat-form__invalid {
+  box-shadow: 0 0 .1rem .1rem inset var(--brand-warning);
+}
+
+.chat-form__input--invalid::placeholder {
+  color: var(--brand-warning);
+  opacity: 0.95;
+}
+
 @supports not selector(:has(*)) {
   .chat-form:focus-within {
     box-shadow: 0 0 .1rem .1rem inset var(--brand-default);
