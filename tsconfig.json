@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    // Enable latest features
+    // Environment setup & latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "allowArbitraryExtensions": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
     "allowJs": true,
@@ -21,6 +20,8 @@
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
 
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
@@ -29,6 +30,7 @@
   },
   // Carpeta(s) o patrón(es) a ignorar:
   "exclude": [
-    "node_modules"
+    "node_modules/**",
+    "compress.builder.ts"
   ]
 }
