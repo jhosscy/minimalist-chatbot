@@ -1,4 +1,6 @@
+import { encode } from 'he';
 import type { ComponentChildren } from 'preact';
+import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
@@ -6,28 +8,24 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ role, content }: ChatMessageProps) {
-  const articleProps = {
-    class: `chat-message chat-message--${role}`,
-    'aria-label': role
-  };
-
   return (
-    <article {...articleProps}>
+    <article class={`chat-message chat-message--${role}`} aria-label={role}>
       <div class="marked-content" dangerouslySetInnerHTML={{ __html: content }}></div>
     </article>
   );
 }
 
 interface ChatResponseProps {
-  userMessageHtml: string;
-  assistantMessageHtml: string;
+  chatHistory: Array<ChatMessageProps>;
+  markdownAdapter: MarkdownPort;
 }
 
-export function ChatResponse({ userMessageHtml, assistantMessageHtml }: ChatResponseProps) {
+export function ChatResponse({ chatHistory, markdownAdapter }: ChatResponseProps) {
   return (
     <>
-      <ChatMessage role="user" content={userMessageHtml} />
-      <ChatMessage role="assistant" content={assistantMessageHtml} />
+      {chatHistory.map(({ role, content }) => (
+        <ChatMessage role={role} content={role === 'user' ? encode(content, { useNamedReferences: true }) : markdownAdapter.convertToHtml(content)} />
+      ))}
     </>
   );
 }

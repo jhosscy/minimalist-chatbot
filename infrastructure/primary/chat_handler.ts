@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { renderToString } from 'preact-render-to-string';
-import { encode } from 'he';
-import { ChatMessage } from '../ui/components/ChatResponse.tsx';
+import { ChatResponse, ChatMessage } from '../ui/components/ChatResponse.tsx';
 import createHeaders from '../http/headers.ts';
 import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
 import type { ChatService } from '../../application/ports/chat_service_port.ts';
@@ -21,12 +20,10 @@ export function createChatAdapter(
     const sessionId = existingSessionId || `chat:history:${randomUUID()}`;
 
     const chatHistoryResponse = !userInput ? await databasePort.getConversationMessages(existingSessionId) : await chatService.sendMessage(sessionId, userInput);
-
-    const chatMessagesHtml = chatHistoryResponse.map(({role, content}) => {
-      const formattedContent = role === 'user' ? encode(content, { useNamedReferences: true }) : markdownAdapter.convertToHtml(content);
-      return renderToString(ChatMessage({ role, content: formattedContent }))
-    }).join('\n');
-
+    const chatMessagesHtml = renderToString(ChatResponse({
+      chatHistory: chatHistoryResponse,
+      markdownAdapter
+    }));
 
     const rewriteHistory = new HTMLRewriter().on("section.chat-history", {
       async element(element) {
