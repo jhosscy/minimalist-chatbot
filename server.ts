@@ -11,6 +11,7 @@ import { createRedisDatabaseAdapter } from './infrastructure/secondary/redis_ada
 import { createGroqLlmAdapter } from './infrastructure/secondary/groq_llm_adapter.ts';
 import { createMarkedMarkdownAdapter } from './infrastructure/secondary/marked_markdown_adapter.ts'
 import { createChatAdapter } from './infrastructure/primary/chat_handler.ts';
+import { createChatSsrAdapter } from './infrastructure/primary/chat_ssr.tsx';
 import { createChatUseCase } from './application/chat_use_case.ts';
 
 //const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
@@ -27,6 +28,7 @@ const chatService = createChatUseCase(llmChatAdapter, databaseAdapter);
 const brotliCompressAsync = promisify(brotliCompress);
 
 const { handleChat } = createChatAdapter(chatService, markdownAdapter, databaseAdapter);
+const { handleChatSsrGet, handleChatSsrPost } = createChatSsrAdapter(chatService, markdownAdapter, databaseAdapter);
 
 const RAW_EXTS = new Set([
   "png", "jpg", "jpeg", "webp", "gif", "svg", "avif",
@@ -60,6 +62,25 @@ Bun.serve({
             });
         const encodingType = isOldBrowser ? 'gzip' : 'br';
         return handleChat(req, Home as unknown as string, encodingType, compressed);
+      }
+    },
+    '/chat': {
+      GET: () => handleChatSsrGet(),
+      POST: (req: Request) => {
+        const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
+        const isOldBrowser = browser.satisfies({
+          chrome: '~95'
+        });
+        const compressed = isOldBrowser
+          ? async (content: string) => Bun.gzipSync(content)
+          : (content: string) => brotliCompressAsync(content, {
+              params: {
+                [zc.BROTLI_PARAM_QUALITY]: 11,
+                [zc.BROTLI_PARAM_SIZE_HINT]: content.length,
+              },
+            });
+        const encodingType = isOldBrowser ? 'gzip' : 'br';
+        return handleChatSsrPost(req, encodingType, compressed)
       }
     }
   },
