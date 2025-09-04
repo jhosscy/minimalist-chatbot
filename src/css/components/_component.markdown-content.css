@@ -58,8 +58,6 @@
 }
 
 .marked-content pre {
-  border: .3rem solid var(--border-default);
-  border-radius: .6rem;
   margin: 1rem 0;
   overflow-x: auto;
 }
@@ -68,9 +66,27 @@
   border-radius: 0;
 }
 
-/* Scrollbar personalizada para bloques de código */
 .marked-content code::-webkit-scrollbar-track {
   background: var(--scrollbar-track-bg);
+}
+
+.code-block-container {
+  background-color: #0d1117;
+  border: .25rem solid var(--border-default);
+  border-radius: 0.625rem;
+  overflow: clip;
+}
+
+.code-header {
+  border-bottom: .25rem solid #30363d;
+  padding: .1rem 1rem;
+}
+
+.code-language {
+  color: #c9d1d9;
+  font-family: var(--font-family-code);
+  font-weight: 600;
+  font-size: .825rem;
 }
 
 /* Citas */
