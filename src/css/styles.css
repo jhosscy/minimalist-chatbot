@@ -29,6 +29,7 @@
 @import url('components/_component.sidebar.css');
 @import url('components/_component.header.css');
 @import url('components/_component.switch.css');
+@import url('components/_component.empty-chat.css');
 
 /* ==========================================================================
    6. UTILITIES - Clases de ayuda con alta especificidad.

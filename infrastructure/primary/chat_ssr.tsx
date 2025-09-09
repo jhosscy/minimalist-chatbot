@@ -3,6 +3,7 @@ import { renderToString } from 'preact-render-to-string';
 import { encode } from 'he';
 import { ChatSsrPage } from '@components/ChatPage.tsx';
 import { ChatMessageItem } from '@components/ChatResponse.tsx';
+import { EmptyChat } from '@components/EmptyChat.tsx';
 import createHeaders from '../http/headers.ts';
 import type { MarkdownPort } from '@domain/ports/markdown_port.ts';
 import type { ChatServicePort } from '@application/ports/chat_service_port.ts';
@@ -43,19 +44,33 @@ export function createChatSsrAdapter(
     const chatHistoryResponse = await databasePort.getConversationMessages(sessionId);
     const isNewChatPage = url.pathname === '/chat';
 
+    const isEmptyState = chatHistoryResponse.length === 0 && !isNewChatPage;
     const pageTree = renderToString(
-      <ChatSsrPage sessions={conversations} sessionId={sessionId} isPromptEmpty={empty === 'empty'} isNewChatPage={isNewChatPage} isTemporaryChat={temporaryChat}>
-        {chatHistoryResponse.map(({role, content}) => (
-          <ChatMessageItem
-            role={role}
-            content={
-              role === 'user'
-                ? encode(content, { useNamedReferences: true })
-                : markdownAdapter.convertToHtml(content)
-            }
-          />
-        ))}
-        <span id="end"></span>
+      <ChatSsrPage
+        sessions={conversations}
+        sessionId={sessionId}
+        isPromptEmpty={empty === 'empty'}
+        isNewChatPage={isNewChatPage}
+        isTemporaryChat={temporaryChat}
+        isEmptyState={isEmptyState}
+      >
+        {
+          isEmptyState
+            ? <EmptyChat />
+            : <>
+                {chatHistoryResponse.map(({ role, content }) => (
+                  <ChatMessageItem
+                    role={role}
+                    content={
+                      role === 'user'
+                        ? encode(content, { useNamedReferences: true })
+                        : markdownAdapter.convertToHtml(content)
+                    }
+                  />
+                ))}
+                <span id="end"></span>
+              </>
+        }
       </ChatSsrPage>
     )
     return new Response((await compressor(pageTree)) as unknown as ArrayBuffer, createHeaders({
