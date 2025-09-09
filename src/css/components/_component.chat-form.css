@@ -1,7 +1,10 @@
 .chat-form {
+  grid-area: prompt;
   background-color: var(--bg-secondary);
   border: none;
   border-radius: 1.3rem 1.3rem 0 0;
+  width: 100%;
+  max-width: 40rem;
   padding-bottom: .5rem;
 }
 
@@ -40,7 +43,7 @@
 }
 
 .chat-form__submit {
-  /* Clase específica para el botón de envío si necesitas estilos adicionales */
+  margin-right: 1rem;
 }
 
 .chat-form__invalid {

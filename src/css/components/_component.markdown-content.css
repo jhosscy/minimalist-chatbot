@@ -74,6 +74,7 @@
   background-color: #0d1117;
   border: .25rem solid var(--border-default);
   border-radius: 0.625rem;
+  margin: 1rem 0;
   overflow: clip;
 }
 

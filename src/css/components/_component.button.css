@@ -9,11 +9,14 @@
 .button--primary {
   background-color: var(--brand-default);
   color: var(--brand-text);
-  margin-right: 1rem;
 }
 
 .button--primary:hover {
   background-color: var(--brand-muted);
+}
+
+.button--primary:hover .bg-path {
+  fill: var(--brand-muted);
 }
 
 .button--primary:disabled {

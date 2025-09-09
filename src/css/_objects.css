@@ -5,8 +5,11 @@
 */
 
 .chat-history {
-  display: grid;
-  justify-items: center;
-  row-gap: .8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  row-gap: 1rem;
+  width: 100%;
+  max-width: 40rem;
   padding: 1rem 0;
 }

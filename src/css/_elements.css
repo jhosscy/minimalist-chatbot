@@ -1,12 +1,22 @@
 body {
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header"
+    "chat"
+    "prompt";
+  justify-items: center;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   height: 100dvh;
 }
 
 main {
+  grid-area: chat;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  padding-left: .6rem;
   overflow-y: scroll;
   scroll-behavior: smooth;
 }
@@ -15,8 +25,8 @@ svg {
   pointer-events: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  ::-webkit-scrollbar {
+@supports selector(::-webkit-scrollbar) {
+  *::-webkit-scrollbar {
     width: .4rem;
     height: .4rem;
   }
@@ -31,8 +41,25 @@ svg {
   }
 }
 
+* {
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--bg-primary);
+  scrollbar-width: thin;
+}
+
 @supports not (height: 100dvh) {
   body {
     height: 100vh;
+  }
+}
+
+@media (width >= 768px) {
+  body {
+    grid-template-columns: var(--sidebar-w, 0) 1fr;
+    grid-template-areas:
+      "sidebar header"
+      "sidebar chat"
+      "sidebar prompt";
+    column-gap: calc(var(--sidebar-w, 0rem) - 17rem);
+    transition: grid-template-columns .2s linear, column-gap .2s linear;
   }
 }

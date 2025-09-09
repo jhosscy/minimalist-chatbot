@@ -1,5 +1,4 @@
 .chat-message {
-  padding: .5rem 1rem;
   width: 100%;
   overflow-wrap: break-word;
   font-family: var(--font-family-primary);
@@ -11,9 +10,17 @@
   color: var(--user-message-text);
   width: 95%;
   border-radius: .6rem;
+  padding: .5rem 1rem;
   white-space: break-spaces;
 }
 
 .chat-message--assistant {
+  padding: 0 1rem;
   hyphens: auto;
+}
+
+@media (width >= 768px) {
+  .chat-message--assistant {
+    padding: 0;
+  }
 }

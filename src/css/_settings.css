@@ -58,30 +58,37 @@
   --font-family-primary: 'Inter', sans-serif, system-ui;
   --font-family-code: 'JetBrainsMono', monospace, system-ui;
 
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --text-primary: #e0e0e0;
-  --text-placeholder: #6b6b6b;
-  --border-default: #333333;
-  --border-hover: #4d4d4d;
-  
-  --brand-default: #315ca9;
-  --brand-muted: #4e76c2;
-  --brand-text: #ffffff;
-  --brand-warning: #FBBF24;
-  
-  --brand-disabled-bg: #1e3a5f;
-  --brand-disabled-text: #7a8fa8;
-  
-  --user-message-bg: #2a2a2a;
-  --user-message-text: #ffffff;
+  --bg-primary: oklch(18.22% 0 0);
+  --bg-secondary: oklch(23.50% 0 0);
+  --text-primary: oklch(90.67% 0 0);
+  --text-placeholder: oklch(52.78% 0 0);
+  --border-default: oklch(32.11% 0 0);
+  --border-hover: oklch(42.02% 0 0);
 
-  --scrollbar-track-bg: #1e1e1e;
-  --scrollbar-thumb-bg: #4a4a4a;
-  --scrollbar-thumb-bg-hover: #6c6c6c;
+  --brand-default: oklch(48.54% 0.1326 261);
+  --brand-muted: oklch(57.25% 0.1261 262.2);
+  --brand-text: oklch(100.00% 0 0);
+  --brand-warning: oklch(83.69% 0.1644 84.4);
 
-  --table-header-bg: #2c2c2c;
-  --table-row-bg: #222222;
+  --brand-disabled-bg: oklch(34.62% 0.0736 256);
+  --brand-disabled-text: oklch(64.24% 0.0447 253);
+
+  --user-message-bg: oklch(28.50% 0 0);
+  --user-message-text: oklch(100.00% 0 0);
+
+  --scrollbar-track-bg: oklch(23.50% 0 0);
+  --scrollbar-thumb-bg: oklch(40.91% 0 0);
+  --scrollbar-thumb-bg-hover: oklch(53.13% 0 0);
+
+  --table-header-bg: oklch(29.31% 0 0);
+  --table-row-bg: oklch(25.20% 0 0);
+
+  --switch-primary: var(--brand-default);
+  --switch-track: var(--scrollbar-thumb-bg);
+  --switch-track-hover: var(--scrollbar-thumb-bg-hover);
+  --switch-thumb: var(--brand-text);
+  --switch-thumb-shadow: rgb(0 0 0 / .35);
+  --switch-focus-inner: color-mix(in oklch, var(--brand-default) 40%, transparent);
 }
 
 @supports (font-variation-settings: normal) {
