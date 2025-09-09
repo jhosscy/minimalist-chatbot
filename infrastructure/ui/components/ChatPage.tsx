@@ -1,23 +1,37 @@
+import { ChatSidebar } from './ChatSidebar.tsx';
+import { ChatHeader } from './ChatHeader.tsx';
+import type { ComponentChildren } from 'preact';
+import type { ChatSession } from './ChatSidebar.tsx'
+
 interface ChatSsrPageProps {
   children?: ComponentChildren;
-  sessionId?: string;
+  sessionId: string;
   isPromptEmpty?: boolean;
+  sessions?: Array<ChatSession>;
+  isNewChatPage: boolean;
+  isTemporaryChat: boolean;
 }
 
-export function ChatSsrPage({ children, sessionId, isPromptEmpty }: ChatSsrPageProps) {
+export function ChatSsrPage({ children, sessionId, isPromptEmpty, isNewChatPage, isTemporaryChat, sessions = [] }: ChatSsrPageProps) {
   return (
     <html lang="en">
       <head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>ChatBot</title>
-        <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
-        <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin/>
-        <link rel="preload" href="fonts/JetBrainsMonoVariable.woff2" as="font" type="font/woff2" crossorigin/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"/>
-        <link rel="stylesheet" href="css/styles.css"/>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+        <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        <link rel="preload" href="/fonts/JetBrainsMonoVariable.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        <link rel="stylesheet" href="/css/styles.css"/>
       </head>
       <body>
+        {/* Toggle solo-CSS */}
+        <input id="sidebar-toggle" class="sidebar__toggle" type="checkbox" hidden />
+
+        <ChatHeader isNewChatPage={isNewChatPage} />
+
+        <ChatSidebar sessions={sessions} currentSessionId={sessionId} />
+
         <main>
           <section class="chat-history">
             {children}
@@ -25,7 +39,7 @@ export function ChatSsrPage({ children, sessionId, isPromptEmpty }: ChatSsrPageP
         </main>
 
         <section class={`chat-form ${isPromptEmpty ? 'chat-form__invalid' : ''}`}>
-          <form action="/chat#end" method="post" autocomplete="off" novalidate>
+          <form action={`/chat/c/${sessionId}#end`} method="post" autocomplete="off" novalidate>
             <label for="prompt-input" class="sr-only">Enter your prompt</label>
             <textarea
               id="prompt-input"
@@ -33,10 +47,11 @@ export function ChatSsrPage({ children, sessionId, isPromptEmpty }: ChatSsrPageP
               name="prompt"
               placeholder={isPromptEmpty ? 'The message cannot be empty…' : 'Ask something…'}
               aria-label="Chat input"
-              rows="1"
+              rows={1}
               required
             ></textarea>
-            <input type="hidden" name="session" value={sessionId} id="session-uuid"/>
+            {/*<input type="hidden" name="session" value={sessionId} id="session-uuid"/>*/}
+            <input id="temporary-toggle" class="switch__input" type="checkbox" name="temporary-chat" hidden checked={isTemporaryChat}/>
             <button type="submit" class="chat-form__submit button button--primary">
               <svg width="38" height="38" viewBox="-6 -8 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22 2L11 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -45,7 +60,11 @@ export function ChatSsrPage({ children, sessionId, isPromptEmpty }: ChatSsrPageP
             </button>
           </form>
         </section>
+        {/* Overlay: al hacer click aquí se togglea el checkbox (cierra). */}
+        <label for="sidebar-toggle" class="sidebar__overlay" aria-hidden="true"></label>
       </body>
     </html>
   )
 };
+
+//{`/chat/c/${sessionId}#end`}
