@@ -1,5 +1,5 @@
 import { Groq } from 'groq-sdk';
-import type { LlmChatPort } from '../../domain/ports/llm_port.ts';
+import type { LlmChatPort, ChatMessage } from '@domain/ports/llm_port.ts';
 
 
 export function createGroqLlmAdapter(apiKey: string): LlmChatPort {
@@ -7,7 +7,7 @@ export function createGroqLlmAdapter(apiKey: string): LlmChatPort {
   const MODEL_NAME = 'meta-llama/llama-4-maverick-17b-128e-instruct';
 
   return {
-    async generateResponse(messages) {
+    async generateResponse(messages: Array<ChatMessage>) {
       const chatCompletion = await groq.chat.completions.create({
         "messages": messages,
         "model": MODEL_NAME,

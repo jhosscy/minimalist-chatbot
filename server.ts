@@ -4,15 +4,15 @@ import { join } from 'node:path';
 import Bowser from "bowser";
 import { transform } from 'lightningcss';
 
-import Home from './src/index.html' with { type: 'text' };
-import createHeaders from './infrastructure/http/headers.ts';
-import { eTag, ifNoneMatch } from './infrastructure/http/etag.ts';
-import { createRedisDatabaseAdapter } from './infrastructure/secondary/redis_adapter.ts';
-import { createGroqLlmAdapter } from './infrastructure/secondary/groq_llm_adapter.ts';
-import { createMarkedMarkdownAdapter } from './infrastructure/secondary/marked_markdown_adapter.ts'
-import { createChatAdapter } from './infrastructure/primary/chat_handler.ts';
-import { createChatSsrAdapter } from './infrastructure/primary/chat_ssr.tsx';
-import { createChatUseCase } from './application/chat_use_case.ts';
+import Home from '@src/index.html' with { type: 'text' };
+import createHeaders from '@infrastructure/http/headers.ts';
+import { eTag, ifNoneMatch } from '@infrastructure/http/etag.ts';
+import { createRedisDatabaseAdapter } from '@infrastructure/secondary/redis_adapter.ts';
+import { createGroqLlmAdapter } from '@infrastructure/secondary/groq_llm_adapter.ts';
+import { createMarkedMarkdownAdapter } from '@infrastructure/secondary/marked_markdown_adapter.ts'
+import { createChatAdapter } from '@infrastructure/primary/chat_handler.ts';
+import { createChatSsrAdapter } from '@infrastructure/primary/chat_ssr.tsx';
+import { createChatUseCase } from '@application/chat_use_case.ts';
 
 //const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
 const GROQ_API_KEY = Bun.env.GROQ_API_KEY ?? '';
@@ -65,8 +65,7 @@ Bun.serve({
       }
     },
     '/chat': {
-      GET: () => handleChatSsrGet(),
-      POST: (req: Request) => {
+      GET: (req: Request) => {
         const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
         const isOldBrowser = browser.satisfies({
           chrome: '~95'
@@ -80,15 +79,34 @@ Bun.serve({
               },
             });
         const encodingType = isOldBrowser ? 'gzip' : 'br';
-        return handleChatSsrPost(req, encodingType, compressed)
+        return handleChatSsrGet(req, encodingType, compressed);
       }
-    }
+    },
+    '/chat/c/:id': {
+      GET: (req: Request) => {
+        const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
+        const isOldBrowser = browser.satisfies({
+          chrome: '~95'
+        });
+        const compressed = isOldBrowser
+          ? async (content: string) => Bun.gzipSync(content)
+          : (content: string) => brotliCompressAsync(content, {
+              params: {
+                [zc.BROTLI_PARAM_QUALITY]: 11,
+                [zc.BROTLI_PARAM_SIZE_HINT]: content.length,
+              },
+            });
+        const encodingType = isOldBrowser ? 'gzip' : 'br';
+        return handleChatSsrGet(req, encodingType, compressed);
+      },
+      POST: (req: Request) => handleChatSsrPost(req)
+    },
   },
   async fetch(req: Request) {
     const { pathname } = new URL(req.url);
     const fileExtension = pathname.split('.').pop() || '';
     const acceptEncoding = req.headers.get('accept-encoding') || '';
-    const ifNone = req.headers.get('if-none-match');
+    const ifNoneMatchHeader = req.headers.get('if-none-match');
     const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
     const isOldBrowser = browser.satisfies({
       chrome: '~95'
@@ -99,8 +117,8 @@ Bun.serve({
     const distPath = `${process.cwd()}/src/dist${adjustedPath}`;
     const srcPath = `${process.cwd()}/src${adjustedPath}`;
 
-    const distFileTemp = Bun.file(distPath);
-    if (!await distFileTemp.exists() && !RAW_EXTS.has(fileExtension)) {
+    const distFile = Bun.file(distPath);
+    if (!await distFile.exists() && !RAW_EXTS.has(fileExtension)) {
       const { outputs } = await Bun.build({
         entrypoints: [srcPath],
         minify: fileExtension === 'css' ? false : true,
@@ -132,7 +150,7 @@ Bun.serve({
     const uint8Array = new Uint8Array(fileBuffer);
     const computedEtag = await eTag(uint8Array);
 
-    if (!ifNoneMatch(ifNone, computedEtag)) {
+    if (!ifNoneMatch(ifNoneMatchHeader, computedEtag)) {
       return new Response(null, createHeaders({
         status: 304,
         customHeaders: {

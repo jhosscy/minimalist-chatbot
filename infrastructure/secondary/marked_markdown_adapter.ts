@@ -1,7 +1,7 @@
 import { Marked, Renderer } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
-import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
+import type { MarkdownPort } from '@domain/ports/markdown_port.ts';
 
 const renderer = new Renderer();
 
@@ -46,7 +46,7 @@ export function createMarkedMarkdownAdapter(): MarkdownPort {
     }
   );
   return {
-    convertToHtml(markdown) {
+    convertToHtml(markdown: string): string {
       try {
         const res = htmlParser.parse(markdown) as string;
         return res;

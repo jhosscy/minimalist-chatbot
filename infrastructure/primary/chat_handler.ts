@@ -1,25 +1,26 @@
 import { randomUUID } from 'node:crypto';
 import { renderToString } from 'preact-render-to-string';
-import { ChatResponse, ChatMessage } from '../ui/components/ChatResponse.tsx';
+import { ChatResponse } from '@components/ChatResponse.tsx';
 import createHeaders from '../http/headers.ts';
-import type { MarkdownPort } from '../../domain/ports/markdown_port.ts';
-import type { ChatService } from '../../application/ports/chat_service_port.ts';
-import type { DatabasePort } from '../../domain/ports/database_port.ts';
+import type { MarkdownPort } from '@domain/ports/markdown_port.ts';
+import type { ChatServicePort } from '@application/ports/chat_service_port.ts';
+import type { DatabasePort } from '@domain/ports/database_port.ts';
 
 type Compressor = (payload: string) => Promise<Uint8Array | Buffer>;
 
 export function createChatAdapter(
-  chatService: ChatService,
+  chatServicePort: ChatServicePort,
   markdownAdapter: MarkdownPort,
   databasePort: DatabasePort
 ) {
-  async function handleChat(req: Request, html: string, encodingType: string, compressed: Compressor) {
+  async function handleChat(req: Request, templateHtml: string, contentEncoding: string, compressor: Compressor) {
     const formData = await req.formData();
     const userInput = (formData.get('prompt') as string)?.trim();
+    const temporaryChat = formData.get('temporary-chat');
     const existingSessionId = (formData.get('session') as string)?.trim();
     const sessionId = existingSessionId || `chat:history:${randomUUID()}`;
 
-    const chatHistoryResponse = !userInput ? await databasePort.getConversationMessages(existingSessionId) : await chatService.sendMessage(sessionId, userInput);
+    const chatHistoryResponse = !userInput ? await databasePort.getConversationMessages(existingSessionId) : await chatServicePort.sendMessage(sessionId, userInput, !!temporaryChat);
     const chatMessagesHtml = renderToString(ChatResponse({
       chatHistory: chatHistoryResponse,
       markdownAdapter
@@ -38,7 +39,7 @@ export function createChatAdapter(
       }
     });
 
-    const withHistory = rewriteHistory.transform(html);
+    const withHistory = rewriteHistory.transform(templateHtml);
     let finalHtml = rewriteSession.transform(withHistory);
 
     if (!userInput) {
@@ -56,10 +57,10 @@ export function createChatAdapter(
       }).transform(finalHtml);
     }
 
-    return new Response((await compressed(finalHtml)) as unknown as ArrayBuffer, createHeaders({
+    return new Response((await compressor(finalHtml)) as unknown as ArrayBuffer, createHeaders({
       ext: 'html',
       customHeaders: {
-        'Content-Encoding':  encodingType,
+        'Content-Encoding':  contentEncoding,
         'X-Content-Type-Options': 'nosniff'
       }
     }));
