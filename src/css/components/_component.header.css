@@ -1,0 +1,19 @@
+.app-header {
+  grid-area: header;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-top: none;
+  border-bottom-left-radius: .8rem;
+  border-bottom-right-radius: .8rem;
+  height: 3.25rem;
+  width: 100%;
+  max-width: 40rem;
+}
+
+.app-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .35rem .5rem;
+}
