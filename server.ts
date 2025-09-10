@@ -1,10 +1,13 @@
 import { brotliCompress, constants as zc } from 'node:zlib';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
-import Bowser from "bowser";
+import Bowser from 'bowser';
 import { transform } from 'lightningcss';
+import { renderToString } from 'preact-render-to-string';
 
 import Home from '@src/index.html' with { type: 'text' };
+import { NotFoundPage } from '@components/NotFoundPage.tsx';
+
 import createHeaders from '@infrastructure/http/headers.ts';
 import { eTag, ifNoneMatch } from '@infrastructure/http/etag.ts';
 import { createRedisDatabaseAdapter } from '@infrastructure/secondary/redis_adapter.ts';
@@ -104,6 +107,16 @@ Bun.serve({
   },
   async fetch(req: Request) {
     const { pathname } = new URL(req.url);
+    const hasExtension = pathname.lastIndexOf('.') > pathname.lastIndexOf('/');
+    if (!hasExtension) {
+      return new Response(renderToString(NotFoundPage()), createHeaders({
+        ext: 'html',
+        status: 404,
+        customHeaders: {
+          'X-Content-Type-Options': 'nosniff'
+        }
+      }));
+    };
     const fileExtension = pathname.split('.').pop() || '';
     const acceptEncoding = req.headers.get('accept-encoding') || '';
     const ifNoneMatchHeader = req.headers.get('if-none-match');
@@ -119,29 +132,39 @@ Bun.serve({
 
     const distFile = Bun.file(distPath);
     if (!await distFile.exists() && !RAW_EXTS.has(fileExtension)) {
-      const { outputs } = await Bun.build({
-        entrypoints: [srcPath],
-        minify: fileExtension === 'css' ? false : true,
-        naming: {
-          entry: `${fileExtension === 'js' ? legacyOrModernDir : fileExtension}/[name].[ext]`,
-        },
-        define: { API_BASE: '' },
-        drop: ['debugger'],
-        external: ['../fonts/*']
-      });
-
-      const artifact = outputs[0];
-      const outputPath = join(`${process.cwd()}/src/dist`, artifact?.path ?? '');
-      let outputContent: Uint8Array | string = await artifact?.text() ?? '';
-      if (fileExtension === 'css') {
-        let { code } = transform({
-          code: Buffer.from(outputContent),
-          minify: true,
-          filename: ''
+      try {
+        const { outputs } = await Bun.build({
+          entrypoints: [srcPath],
+          minify: fileExtension === 'css' ? false : true,
+          naming: {
+            entry: `${fileExtension === 'js' ? legacyOrModernDir : fileExtension}/[name].[ext]`,
+          },
+          define: { API_BASE: '' },
+          drop: ['debugger'],
+          external: ['../fonts/*']
         });
-        outputContent = code
+
+        const artifact = outputs[0];
+        const outputPath = join(`${process.cwd()}/src/dist`, artifact?.path ?? '');
+        let outputContent: Uint8Array | string = await artifact?.text() ?? '';
+        if (fileExtension === 'css') {
+          let { code } = transform({
+            code: Buffer.from(outputContent),
+            minify: true,
+            filename: ''
+          });
+          outputContent = code
+        }
+        await Bun.write(outputPath, outputContent);
+      } catch {
+        return new Response(renderToString(NotFoundPage()), createHeaders({
+          ext: 'html',
+          status: 404,
+          customHeaders: {
+            'X-Content-Type-Options': 'nosniff'
+          }
+        }));
       }
-      await Bun.write(outputPath, outputContent);
     }
 
     const preferredSrcPath = await Bun.file(`${srcPath}.br`).exists() ? `${srcPath}.br` : srcPath;
