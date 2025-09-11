@@ -20,13 +20,15 @@ export function createChatSsrAdapter(
     const formData = await req.formData();
     const userInput = (formData.get('prompt') as string)?.trim();
     const temporaryChat = formData.get('temporary-chat');
+    const modelKey = (formData.get('model') as string) || undefined;
     const sessionId = (req as any).params.id;
 
-    userInput && await chatServicePort.sendMessage(sessionId, userInput, !!temporaryChat);
+    userInput && await chatServicePort.sendMessage(sessionId, userInput, !!temporaryChat, modelKey);
 
     let url = `/chat/c/${sessionId}`;
     const params = [];
 
+    params.push(`model=${modelKey}`);
     if (!userInput) params.push('prompt=empty');
     if (temporaryChat) params.push('temporary-chat=true');
     if (params.length) url += '?' + params.join('&');
@@ -39,6 +41,7 @@ export function createChatSsrAdapter(
     const url = new URL(req.url);
     const empty = url.searchParams.get('prompt');
     const temporaryChat = url.searchParams.get('temporary-chat') === 'true';
+    const model = url.searchParams.get('model');
     const sessionId = (req as any).params.id || `${randomUUID()}`;
     const conversations = await databasePort.getConversations();
     const chatHistoryResponse = await databasePort.getConversationMessages(sessionId);
@@ -49,6 +52,7 @@ export function createChatSsrAdapter(
       <ChatSsrPage
         sessions={conversations}
         sessionId={sessionId}
+        model={model}
         isPromptEmpty={empty === 'empty'}
         isNewChatPage={isNewChatPage}
         isTemporaryChat={temporaryChat}

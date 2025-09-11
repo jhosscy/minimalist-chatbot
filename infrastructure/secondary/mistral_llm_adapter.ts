@@ -3,13 +3,14 @@ import type { MessageOutputEntry } from '@mistralai/mistralai/models/components'
 import type { LlmChatPort, ChatMessage } from '@domain/ports/llm_port.ts';
 
 export function createMistralLlmAdapter(apiKey: string): LlmChatPort {
-  const MODEL_NAME = 'mistral-small-latest';
+  const DEFAULT_MODEL = 'mistral-small-latest';
   const client = new Mistral({ apiKey });
 
   return {
-    async generateResponse(messages: Array<ChatMessage>) {
+    async generateResponse(messages: Array<ChatMessage>, modelKey?: string) {
+      const model = (modelKey?.startsWith('mistral:') ? modelKey.split(':', 2)[1] : '') || DEFAULT_MODEL;
       const chatResponse = await client.beta.conversations.start({
-        model: MODEL_NAME,
+        model,
         inputs: messages,
         store: false,
       })

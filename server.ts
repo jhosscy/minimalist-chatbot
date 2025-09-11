@@ -11,18 +11,26 @@ import { NotFoundPage } from '@components/NotFoundPage.tsx';
 import createHeaders from '@infrastructure/http/headers.ts';
 import { eTag, ifNoneMatch } from '@infrastructure/http/etag.ts';
 import { createRedisDatabaseAdapter } from '@infrastructure/secondary/redis_adapter.ts';
+// LLM adapters
+import { createMistralLlmAdapter } from '@infrastructure/secondary/mistral_llm_adapter.ts';
 import { createGroqLlmAdapter } from '@infrastructure/secondary/groq_llm_adapter.ts';
+import { createRoutingLlmAdapter } from '@infrastructure/secondary/routing_llm_adapter.ts';
 import { createMarkedMarkdownAdapter } from '@infrastructure/secondary/marked_markdown_adapter.ts'
 import { createChatAdapter } from '@infrastructure/primary/chat_handler.ts';
 import { createChatSsrAdapter } from '@infrastructure/primary/chat_ssr.tsx';
 import { createChatUseCase } from '@application/chat_use_case.ts';
 
-//const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
+const MISTRAL_API_KEY = Bun.env.MISTRAL_API_KEY ?? '';
 const GROQ_API_KEY = Bun.env.GROQ_API_KEY ?? '';
 const REDIS_UPSTASH_URL = Bun.env.REDIS_UPSTASH_URL ?? '';
 const REDIS_UPSTASH_TOKEN = Bun.env.REDIS_UPSTASH_TOKEN ?? '';
 
-const llmChatAdapter = createGroqLlmAdapter(GROQ_API_KEY);
+const mistralAdapter = createMistralLlmAdapter(MISTRAL_API_KEY);
+const groqAdapter = createGroqLlmAdapter(GROQ_API_KEY);
+const llmChatAdapter = createRoutingLlmAdapter({
+  mistral: mistralAdapter,
+  groq: groqAdapter,
+}, 'groq');
 const markdownAdapter = createMarkedMarkdownAdapter();
 const databaseAdapter = createRedisDatabaseAdapter(REDIS_UPSTASH_URL, REDIS_UPSTASH_TOKEN);
 
