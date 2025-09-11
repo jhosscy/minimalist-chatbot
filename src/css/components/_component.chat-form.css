@@ -6,6 +6,7 @@
   width: 100%;
   max-width: 40rem;
   padding-bottom: .5rem;
+  color-scheme: dark; /* ayuda a menus nativos en tema oscuro */
 }
 
 .chat-form form {
@@ -59,4 +60,102 @@
   .chat-form:focus-within {
     box-shadow: 0 0 .1rem .1rem inset var(--brand-default);
   }
+}
+
+/* Controls row: model selector + submit */
+.chat-form__controls {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: 0 .5rem;
+}
+
+.chat-form__controls .chat-form__submit {
+  margin-left: auto;
+}
+
+/* Custom select styling */
+.chat-form__select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.chat-form__select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-family: var(--font-family-primary);
+  font-size: .95rem;
+  line-height: 1.2;
+  color: var(--select-text);
+  background-color: var(--select-surface);
+  border: 1px solid var(--select-border);
+  border-radius: .75rem;
+  width: 100%;
+  max-width: 13rem;
+  padding: .55rem 2rem .55rem .85rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  box-shadow:
+    0 .05rem .25rem inset rgb(255 255 255 / .06),
+    0 .25rem .75rem rgb(0 0 0 / .35);
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+  color-scheme: dark; /* intenta sincronizar el menú nativo */
+}
+
+.chat-form__select:hover {
+  border-color: color-mix(in oklch, var(--select-border) 55%, var(--select-accent) 45%);
+}
+
+.chat-form__select:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 .125rem color-mix(in oklch, var(--select-accent) 35%, transparent),
+    0 0 0 .25rem var(--select-accent),
+    0 .25rem .75rem rgb(0 0 0 / .35);
+}
+
+/* Remove default arrow on legacy engines */
+.chat-form__select::-ms-expand {
+  display: none;
+}
+
+/* Custom arrow using triangle */
+.chat-form__select-wrapper::after {
+  content: "";
+  position: absolute;
+  right: .8rem;
+  top: 50%;
+  transform: translateY(-35%);
+  width: 0;
+  height: 0;
+  border-left: .35rem solid transparent;
+  border-right: .35rem solid transparent;
+  border-top: .45rem solid var(--select-text);
+  pointer-events: none;
+}
+
+/* Arrow accent on focus */
+.chat-form__select-wrapper:has(.chat-form__select:focus-visible)::after {
+  border-top-color: var(--select-accent);
+}
+
+@supports not selector(:has(*)) {
+  .chat-form__select-wrapper:focus-within::after {
+    border-top-color: var(--select-accent);
+  }
+}
+
+/* Intentos de tematizar opciones (limitado por navegador/SO) */
+.chat-form__select option,
+.chat-form__select optgroup {
+  background-color: var(--select-surface);
+  color: var(--select-text);
+}
+
+.chat-form__select optgroup {
+  font-weight: 600;
+  color: color-mix(in oklch, var(--select-text) 70%, var(--select-surface) 30%);
 }

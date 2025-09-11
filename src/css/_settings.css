@@ -89,6 +89,12 @@
   --switch-thumb: var(--brand-text);
   --switch-thumb-shadow: rgb(0 0 0 / .35);
   --switch-focus-inner: color-mix(in oklch, var(--brand-default) 40%, transparent);
+
+  /* Select theming (minimal, dedicado) */
+  --select-surface: oklch(27.5% 0 0);
+  --select-text: oklch(94% 0 0);
+  --select-border: oklch(38% 0 0);
+  --select-accent: oklch(54% 0.14 258);
 }
 
 @supports (font-variation-settings: normal) {
