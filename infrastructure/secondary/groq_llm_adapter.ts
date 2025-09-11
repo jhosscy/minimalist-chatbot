@@ -6,7 +6,7 @@ export function createGroqLlmAdapter(apiKey: string): LlmChatPort {
   const DEFAULT_MODEL = 'meta-llama/llama-4-maverick-17b-128e-instruct';
 
   return {
-    async generateResponse(messages: Array<ChatMessage>, modelKey?: string) {
+    async generateResponse(messages: Array<ChatMessage>, modelKey: string) {
       const model = (modelKey?.startsWith('groq:') ? modelKey.split(':', 2)[1] : '') || DEFAULT_MODEL;
       const chatCompletion = await groq.chat.completions.create({
         messages,

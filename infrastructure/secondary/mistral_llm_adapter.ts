@@ -7,7 +7,7 @@ export function createMistralLlmAdapter(apiKey: string): LlmChatPort {
   const client = new Mistral({ apiKey });
 
   return {
-    async generateResponse(messages: Array<ChatMessage>, modelKey?: string) {
+    async generateResponse(messages: Array<ChatMessage>, modelKey: string) {
       const model = (modelKey?.startsWith('mistral:') ? modelKey.split(':', 2)[1] : '') || DEFAULT_MODEL;
       const chatResponse = await client.beta.conversations.start({
         model,

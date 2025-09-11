@@ -2,13 +2,13 @@ import { ChatSidebar } from './ChatSidebar.tsx';
 import { ChatHeader } from './ChatHeader.tsx';
 import { ChatForm } from '@components/ChatForm.tsx';
 import type { ComponentChildren } from 'preact';
-import type { ChatSession } from './ChatSidebar.tsx'
+import type { ConversationMeta } from '@domain/ports/database_port.ts';
 
 interface ChatSsrPageProps {
   children?: ComponentChildren;
   sessionId: string;
-  isPromptEmpty?: boolean;
-  sessions?: Array<ChatSession>;
+  isPromptEmpty: boolean;
+  sessions?: Array<ConversationMeta>;
   isNewChatPage: boolean;
   isTemporaryChat: boolean;
   isEmptyState?: boolean;

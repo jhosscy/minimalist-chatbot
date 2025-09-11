@@ -5,5 +5,5 @@ export interface ChatMessage {
 
 // Chat LLM interface returning full response.
 export interface LlmChatPort {
-  generateResponse(messages: Array<ChatMessage>, modelKey?: string): Promise<string>;
+  generateResponse(messages: Array<ChatMessage>, modelKey: string): Promise<string>;
 }

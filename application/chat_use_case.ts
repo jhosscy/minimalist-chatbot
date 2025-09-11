@@ -4,7 +4,7 @@ import type { DatabasePort } from '@domain/ports/database_port.ts'
 
 export function createChatUseCase(llmPort: LlmChatPort, databasePort: DatabasePort): ChatServicePort {
   return {
-    async sendMessage(sessionId: string, userMessage: string, isTemporary: boolean, modelKey?: string): Promise<Array<ChatMessage>> {
+    async sendMessage(sessionId: string, userMessage: string, isTemporary: boolean, modelKey: string): Promise<Array<ChatMessage>> {
       const previousMessages = await databasePort.getConversationMessages(sessionId);
       let conversationTitle = '';
       if (!previousMessages.length && !isTemporary) {
@@ -12,7 +12,7 @@ export function createChatUseCase(llmPort: LlmChatPort, databasePort: DatabasePo
       };
       const conversationHistory: Array<ChatMessage> = [...previousMessages, { role: 'user', content: userMessage }];
       const assistantMessage = await llmPort.generateResponse(conversationHistory, modelKey);
-      await databasePort.appendMessages(sessionId, conversationTitle, !previousMessages.length && !isTemporary, userMessage, assistantMessage);
+      await databasePort.appendMessages(sessionId, conversationTitle, modelKey, !previousMessages.length && !isTemporary, userMessage, assistantMessage);
       return [...conversationHistory, { role: 'assistant', content: assistantMessage }];
     }
   }

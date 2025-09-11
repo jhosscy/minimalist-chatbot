@@ -1,14 +1,8 @@
 import { ToggleSidebar } from './ToggleSidebar.tsx';
-
-export interface ChatSession {
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-  messagesKey: string;
-}
+import type { ConversationMeta } from '@domain/ports/database_port.ts';
 
 interface ChatSidebarProps {
-  sessions?: Array<ChatSession>;
+  sessions?: Array<ConversationMeta>;
   currentSessionId?: string;
 }
 
@@ -33,13 +27,13 @@ export function ChatSidebar({ sessions = [], currentSessionId }: ChatSidebarProp
           {sessions.length === 0 ? (
             <li class="sidebar__empty">Sin conversaciones aún</li>
           ) : (
-            sortedSessions.map(({ title, updatedAt, messagesKey }) => {
+            sortedSessions.map(({ title, model, updatedAt, messagesKey }) => {
               const isActive = `conv:${currentSessionId}:msgs` === messagesKey;
 
               return (
                 <li key={messagesKey} class="sidebar__item" title={title}>
                   <a
-                    href={`/chat/c/${messagesKey.split(':')[1]}`}
+                    href={`/chat/c/${messagesKey.split(':')[1]}?model=${model}`}
                     class={`sidebar__link ${isActive ? 'is-active' : ''}`}
                     aria-current={isActive ? 'page' : undefined}
                   >

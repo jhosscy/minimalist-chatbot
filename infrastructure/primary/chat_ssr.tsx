@@ -20,7 +20,7 @@ export function createChatSsrAdapter(
     const formData = await req.formData();
     const userInput = (formData.get('prompt') as string)?.trim();
     const temporaryChat = formData.get('temporary-chat');
-    const modelKey = (formData.get('model') as string) || undefined;
+    const modelKey = (formData.get('model') as string) || '';
     const sessionId = (req as any).params.id;
 
     userInput && await chatServicePort.sendMessage(sessionId, userInput, !!temporaryChat, modelKey);
@@ -41,7 +41,7 @@ export function createChatSsrAdapter(
     const url = new URL(req.url);
     const empty = url.searchParams.get('prompt');
     const temporaryChat = url.searchParams.get('temporary-chat') === 'true';
-    const model = url.searchParams.get('model');
+    const model = url.searchParams.get('model') || '';
     const sessionId = (req as any).params.id || `${randomUUID()}`;
     const conversations = await databasePort.getConversations();
     const chatHistoryResponse = await databasePort.getConversationMessages(sessionId);

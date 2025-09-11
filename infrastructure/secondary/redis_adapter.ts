@@ -6,7 +6,7 @@ export function createRedisDatabaseAdapter(url: string, token: string): Database
   const kMeta = (id: string) => `conv:${id}:meta`;
   const kMsgs = (id: string) => `conv:${id}:msgs`;
   return {
-    async appendMessages(sessionId: string, title: string, shouldPersistMeta: boolean, ...contents: Array<string>) {
+    async appendMessages(sessionId: string, title: string, model: string, shouldPersistMeta: boolean, ...contents: Array<string>) {
       const ts = new Date().toISOString();
       const metaKey = kMeta(sessionId);
       const msgsKey = kMsgs(sessionId);
@@ -14,7 +14,7 @@ export function createRedisDatabaseAdapter(url: string, token: string): Database
       shouldPersistMeta && await redisClient.json.set(
         metaKey,
         '$',
-        { title , createdAt: ts, updatedAt: ts, messagesKey: msgsKey },
+        { title, model, createdAt: ts, updatedAt: ts, messagesKey: msgsKey },
         { nx: true }
       );
 
