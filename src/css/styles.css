@@ -25,6 +25,7 @@
 @import url('components/_component.chat-message.css');
 @import url('components/_component.markdown-content.css');
 @import url('components/_component.button.css');
+@import url('components/_component.toast.css');
 @import url('components/_component.typing-indicator.css');
 @import url('components/_component.sidebar.css');
 @import url('components/_component.header.css');

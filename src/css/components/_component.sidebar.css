@@ -16,6 +16,7 @@ body:has(#sidebar-toggle:checked) {
   width: 100%;
   height: 100dvh;
   max-width: 18rem;
+  padding-bottom: .5rem;
   overflow: hidden;
   left: calc(var(--sidebar-w, 0rem) - 18rem);
   z-index: 10;
@@ -55,7 +56,6 @@ body:has(#sidebar-toggle:checked) {
 .sidebar__nav {
   width: 100%;
   padding: .85rem .45rem;
-  overflow-y: auto;
 }
 
 .sidebar__list {
@@ -66,6 +66,33 @@ body:has(#sidebar-toggle:checked) {
   margin: 0;
   padding: 0;
 }
+
+.sidebar__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .25rem;
+  border: 1px solid #0000;
+  border-radius: .6rem;
+}
+
+.sidebar__item.is-active {
+  background-color: var(--user-message-bg);
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 .05rem var(--border-hover) inset;
+}
+
+.sidebar__item:hover {
+  background-color: var(--user-message-bg);
+  border-color: var(--border-hover);
+}
+
+.sidebar__item:has(.sidebar__checkbox:checked) {
+  box-shadow: 0 0 0 .05rem var(--danger-border) inset;
+  border-color: var(--danger-border);
+  background-color: color-mix(in oklch, var(--danger-bg) 85%, transparent 15%);
+}
+
 
 .sidebar__empty {
   color: var(--text-placeholder);
@@ -78,25 +105,12 @@ body:has(#sidebar-toggle:checked) {
   width: 100%;
   text-align: left;
   background: none;
-  border: 1px solid transparent;
-  border-radius: .6rem;
   color: var(--text-primary);
   padding: .55rem .6rem;
   cursor: pointer;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: .25rem .5rem;
-}
-
-.sidebar__link:hover {
-  background-color: var(--user-message-bg);
-  border-color: var(--border-hover);
-}
-
-.sidebar__link.is-active {
-  background-color: var(--user-message-bg);
-  border-color: var(--border-hover);
-  box-shadow: 0 0 0 .05rem var(--border-hover) inset;
 }
 
 .sidebar__link-title {
@@ -124,6 +138,67 @@ body:has(#sidebar-toggle:checked) {
 
 svg .bg-path {
   transition: fill 0.2s ease-in-out;
+}
+
+.sidebar__form {
+  overflow-y: auto;
+}
+
+/* Selección de eliminación */
+.sidebar__delete-label {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-placeholder);
+  cursor: pointer;
+}
+
+.sidebar__delete-label:hover,
+.sidebar__delete-label:focus-visible {
+  color: var(--text-primary);
+  outline: none;
+}
+
+.sidebar__item:has(.sidebar__checkbox:checked) .sidebar__delete-label {
+  color: var(--danger);
+}
+
+/* Acciones masivas */
+.sidebar__bulk {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: .5rem;
+  background-color: var(--bg-secondary);
+}
+
+.sidebar__bulk-delete {
+  display: block;
+  width: 100%;
+  padding: .6rem .8rem;
+  font-family: var(--font-family-primary);
+  font-weight: 600;
+  font-size: .95rem;
+  color: var(--danger-text);
+  background-color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: .6rem;
+  cursor: pointer;
+}
+
+.sidebar__bulk-delete:hover,
+.sidebar__bulk-delete:focus-visible {
+  background-color: var(--danger-hover);
+  outline: none;
+}
+
+/* Estado visual de inhabilitado cuando no hay selección */
+form.sidebar__form:not(:has(.sidebar__checkbox:checked)) .sidebar__bulk-delete {
+  opacity: .6;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 /* Checkbox oculto */

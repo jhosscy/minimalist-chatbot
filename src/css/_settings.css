@@ -76,6 +76,13 @@
   --user-message-bg: oklch(28.50% 0 0);
   --user-message-text: oklch(100.00% 0 0);
 
+  /* Danger palette (deletion) */
+  --danger: oklch(62% 0.23 29);
+  --danger-hover: oklch(55% 0.22 29);
+  --danger-bg: oklch(32% 0.09 29);
+  --danger-border: oklch(42% 0.13 29);
+  --danger-text: oklch(98% 0 0);
+
   --scrollbar-track-bg: oklch(23.50% 0 0);
   --scrollbar-thumb-bg: oklch(40.91% 0 0);
   --scrollbar-thumb-bg-hover: oklch(53.13% 0 0);
