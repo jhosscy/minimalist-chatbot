@@ -11,6 +11,15 @@ import type { DatabasePort } from '@domain/ports/database_port.ts';
 
 type Compressor = (payload: string) => Promise<Uint8Array | Buffer>;
 
+const toastMessages = {
+  'delete-empty': {
+    message: 'Selecciona al menos una conversación para eliminarla.',
+    icon: 'warning' as const,
+    tone: 'warning' as const,
+    role: 'alert' as const,
+  },
+};
+
 export function createChatSsrAdapter(
   chatServicePort: ChatServicePort,
   markdownAdapter: MarkdownPort,
@@ -40,12 +49,14 @@ export function createChatSsrAdapter(
   async function handleChatSsrGet(req: Request, encodingType: string, compressor: Compressor) {
     const url = new URL(req.url);
     const empty = url.searchParams.get('prompt');
+    const toastKey = url.searchParams.get('toast');
     const temporaryChat = url.searchParams.get('temporary-chat') === 'true';
     const model = url.searchParams.get('model') || '';
     const sessionId = (req as any).params.id || `${randomUUID()}`;
     const conversations = await databasePort.getConversations();
     const chatHistoryResponse = await databasePort.getConversationMessages(sessionId);
     const isNewChatPage = url.pathname === '/chat';
+    const toast = toastKey ? toastMessages[toastKey as keyof typeof toastMessages] : undefined;
 
     const isEmptyState = chatHistoryResponse.length === 0 && !isNewChatPage;
     const pageTree = renderToString(
@@ -54,6 +65,7 @@ export function createChatSsrAdapter(
         sessionId={sessionId}
         model={model}
         isPromptEmpty={empty === 'empty'}
+        toast={toast}
         isNewChatPage={isNewChatPage}
         isTemporaryChat={temporaryChat}
         isEmptyState={isEmptyState}

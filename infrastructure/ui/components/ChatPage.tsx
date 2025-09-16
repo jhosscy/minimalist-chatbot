@@ -1,6 +1,7 @@
 import { ChatSidebar } from './ChatSidebar.tsx';
 import { ChatHeader } from './ChatHeader.tsx';
-import { ChatForm } from '@components/ChatForm.tsx';
+import { Toast } from './Toast.tsx';
+import { ChatForm } from './ChatForm.tsx';
 import type { ComponentChildren } from 'preact';
 import type { ConversationMeta } from '@domain/ports/database_port.ts';
 
@@ -8,6 +9,12 @@ interface ChatSsrPageProps {
   children?: ComponentChildren;
   sessionId: string;
   isPromptEmpty: boolean;
+  toast?: {
+    message: string;
+    icon: 'warning' | 'info' | 'success';
+    tone: 'warning' | 'info' | 'success';
+    role: 'alert' | 'status';
+  };
   sessions?: Array<ConversationMeta>;
   isNewChatPage: boolean;
   isTemporaryChat: boolean;
@@ -15,7 +22,7 @@ interface ChatSsrPageProps {
   model: string;
 }
 
-export function ChatSsrPage({ children, sessionId, model, isPromptEmpty, isNewChatPage, isTemporaryChat, isEmptyState = false, sessions = [] }: ChatSsrPageProps) {
+export function ChatSsrPage({ children, sessionId, model, isPromptEmpty, toast, isNewChatPage, isTemporaryChat, isEmptyState = false, sessions = [] }: ChatSsrPageProps) {
   return (
     <html lang="en">
       <head>
@@ -28,6 +35,10 @@ export function ChatSsrPage({ children, sessionId, model, isPromptEmpty, isNewCh
         <link rel="stylesheet" href="/css/styles.css"/>
       </head>
       <body>
+        {toast && (
+          <Toast {...toast} />
+        )}
+
         {
           isEmptyState ? (
             <main>
