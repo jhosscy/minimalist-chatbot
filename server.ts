@@ -58,7 +58,7 @@ Bun.serve({
       GET: () => {
         return new Response(Home as unknown as string, createHeaders({ ext: 'html' }));
       },
-      POST: async (req: Request) => {
+      POST: (req: Request) => {
         const browser = Bowser.getParser(req.headers.get('user-agent') ?? '');
         const isOldBrowser = browser.satisfies({
           chrome: '~95'
@@ -112,6 +112,29 @@ Bun.serve({
       },
       POST: (req: Request) => handleChatSsrPost(req)
     },
+    '/chat/delete': {
+      POST: async (req: Request) => {
+        const formData = await req.formData();
+        if (!formData.has('delete-ids')) {
+          const refererHeader = req.headers.get('referer');
+          if (refererHeader) {
+            try {
+              const refererUrl = new URL(refererHeader);
+              if (refererUrl.pathname.startsWith('/chat')) {
+                refererUrl.searchParams.set('toast', 'delete-empty');
+                return Response.redirect(`${refererUrl.pathname}${refererUrl.search}`, 303);
+              }
+            } catch {}
+          }
+
+          return Response.redirect('/chat?toast=delete-empty', 303);
+        }
+        const conversationIds = formData.getAll('delete-ids');
+        const redisKeysToDelete = conversationIds.flatMap(value => [`conv:${value}:meta`, `conv:${value}:msgs`]);
+        await databaseAdapter.deleteConversations(redisKeysToDelete);
+        return Response.redirect('/chat', 303);
+      }
+    }
   },
   async fetch(req: Request) {
     const { pathname } = new URL(req.url);

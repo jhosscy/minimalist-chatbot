@@ -11,5 +11,6 @@ export interface ConversationMeta {
 export interface DatabasePort {
   appendMessages(sessionId: string, title: string, model: string, shouldPersistMeta: boolean, ...contents: Array<string>): Promise<void>;
   getConversationMessages(sessionId: string): Promise<Array<ChatMessage>>;
-  getConversations(): Promise<Array<ConversationMeta>>
+  getConversations(): Promise<Array<ConversationMeta>>;
+  deleteConversations(keys: Array<string>): Promise<void>;
 }

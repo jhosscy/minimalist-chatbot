@@ -27,7 +27,7 @@ export function createRedisDatabaseAdapter(url: string, token: string): Database
       if (!rawMessages?.length) return [];
 
       return rawMessages.map((content, index)=> ({
-        role: index % 2 ? 'assistant' : 'user', content
+        role: index % 2 ? 'assistant' : 'user', content: `${content}`
       }));
     },
     async getConversations() {
@@ -35,6 +35,9 @@ export function createRedisDatabaseAdapter(url: string, token: string): Database
       const [_cursor, metaKeys] = await redisClient.scan(scanCursor, { match: "*:meta" });
       const metaValues = metaKeys.length > 0 ? await redisClient.json.mget<Array<ConversationMeta>>(metaKeys, "$") : [];
       return metaValues.flat();
+    },
+    async deleteConversations(keys: Array<string>) {
+      await redisClient.del(...keys);
     }
   }
 }
